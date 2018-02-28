@@ -8,8 +8,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include "func_init.h"
-
+#include "kunbus.h"
+#include <stdlib.h>
 
 void piControlOpen(void)
 {

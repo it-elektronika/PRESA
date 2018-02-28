@@ -1,5 +1,15 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
+#include "graphics_sdl.h"
+#include "presa.h"
+
 int init()    /* things needed to start sdl2 properly */
-{  
+{
+
+  int flags;
+  int innited;
+ 
   flags = IMG_INIT_JPG|IMG_INIT_PNG;
   innited = IMG_Init(flags);
   	
@@ -48,7 +58,7 @@ int init()    /* things needed to start sdl2 properly */
   return 15;
 }
 
-/
+
 
 void freeTexture(void)  
 {
@@ -61,18 +71,25 @@ void freeTexture(void)
   }
 }
 
-void draw(void)     
+
+void renderBackground(void)     
 {
-  if(alarmPosition == 0)
+
+  switch(status)
   {
-    SDL_SetRenderDrawColor(renderer, 0x03, 0x02, 0x20, 0x00);
+    case 1:
+      SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+      break;
+    case 2:
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      break;
+    case 3:
+      SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+      break;
   }
-  else
-  {
-    SDL_SetRenderDrawColor(renderer, 234, 4, 4, 255);
-  } 
   SDL_RenderClear(renderer);
 }
+
 
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
 {
@@ -90,14 +107,10 @@ void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_R
   SDL_RenderCopyEx(renderer, texture, clip, &renderQuad, angle, center, flip);
 }
 
-
-int writeText(const char *text, TTF_Font *textFont,  SDL_Color textColor)  
+int renderText(const char *text, TTF_Font *textFont,  SDL_Color textColor)  
 {
- 	
   SDL_Surface* textSurface;
-  
   textSurface = TTF_RenderText_Solid(textFont, text, textColor);
-
   freeTexture();
 
   if(textSurface == NULL)
@@ -121,6 +134,152 @@ int writeText(const char *text, TTF_Font *textFont,  SDL_Color textColor)
   return texture != NULL;
 }
 
+void renderStatusBar()
+{
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_RenderDrawLine(renderer, 0, 50, 1200, 50);
+  SDL_RenderDrawLine(renderer, 0, 0, 1200, 0);
+  SDL_RenderDrawLine(renderer, 0, 0, 0, 50);
+  
+  switch(regime)
+  {
+    case 1:
+      renderText("STATUS: MIROVANJE", regularText, blackColor); 
+      break;
+
+    case 2:
+      renderText("STATUS: DELOVANJE", regularText, whiteColor);
+      break;
+
+    case 3:
+      renderText("STATUS: DELOVANJE - polavtomatsko", regularText, whiteColor);
+      break;
+
+    case 4:
+      renderText("STATUS: NAPAKA", regularText, whiteColor);
+      break;
+    
+    case 5: 
+      renderText("NASTAVITVE", regularText, blackColor);
+      break;
+  } 
+  render(100, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
+}
+
+void renderStatOne()
+{
+  int i;
+  int y;
+  int sens_c;
+  int count_num;
+  int s_count;
+  sens_c = 0;
+  y = 200;
+  SDL_RenderDrawRect(renderer, &bar1);
+  SDL_RenderDrawRect(renderer, &bar2);
+  
+  for(i = 0; i < 5; i++)
+  {
+    holes[i].x = 50;
+    holes[i].y = y;
+    holes[i].w = 310;
+    holes[i].h = 10;
+    y = y + 100;
+  }
+  
+  sprintf(encoderVal, "ENCODER: %d", encoder);
+  renderText(encoderVal, smallText,  blackColor);
+  render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
+  renderText(savedPlus, smallText, blackColor);
+  render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    
+  for(i = 0; i < 5; i++)
+  {
+    if(sensors[sens_c] > 0 || sensors[sens_c+1] > 0)
+    {
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      SDL_RenderFillRect(renderer, &holes[i]);
+    }
+    else
+    {
+      SDL_RenderDrawRect(renderer, &holes[i]);
+    }
+    sens_c = sens_c + 2;
+  }
+
+  count_num = 0;
+  s_count = 1;
+  y=180;
+  for(i = 0; i < 5; i++)
+  {
+    sprintf(sensorVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+    renderText(sensorVals[count_num], regularText,  blackColor);
+    render(500, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    y = y + 100;
+    count_num = count_num + 2;
+    s_count = s_count + 2;
+  }
+  count_num = 1;
+  s_count = 2;
+  y = 180;
+  for(i = 0; i < 5; i++)
+  {
+    sprintf(sensorVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+    renderText(sensorVals[count_num], regularText,  blackColor);
+    render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    y = y + 100;
+    count_num = count_num + 2;
+    s_count = s_count + 2;
+  }
+} 
+
+void renderSettings()
+{
+  sprintf(currentValue, "TRENUTNA VREDNOST: %d", sensorsValue[0]);
+  sprintf(marginValue, "TOLERANCA: %d ", currentMargin);
+  sprintf(currentPlus, "TRENUTNA MAKSIMALNA DOVOLJENA VREDNOST: %d", sensorsValue[0] + currentMargin);
+  sprintf(savedPlus, "SHRANJENA MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
+  
+  renderText(currentValue, regularText, blackColor);
+  render(100, 100, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+  renderText(marginValue, regularText, blackColor);
+  render(100, 200, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  renderText(currentPlus, regularText, blackColor);
+  render(100, 300, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+  renderText(savedPlus, regularText, blackColor);
+  render(100, 400, NULL, 0.0, NULL, SDL_FLIP_NONE);
+}
+
+void renderContent()
+{
+  switch(status)
+  {
+    case 1:
+      renderStatOne();
+      break;
+  }
+}
+
+void touchUpdate()   /* handling touch events */
+{
+  while(SDL_PollEvent(&event) != 0 )
+  {
+    if(event.type == SDL_FINGERDOWN)  
+    {
+      
+      timestamp = event.tfinger.timestamp;
+      touchLocation.x = event.tfinger.x;
+      touchLocation.y = event.tfinger.y;
+    }
+  }
+}
+
+/*
 
 
 void up_button(int x,  int y)   
@@ -376,22 +535,23 @@ void keypad(int x, int y, int w, int h)
   }
   y = origY;
 }
+*/
 
-void admin(int x, int y, int w, int h, int gotoNum) 
+void renderAdmin(int x, int y, int w, int h, int gotoNum) 
 {
-  SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
   SDL_RenderDrawLine(renderer, x, y, (x+w), y);
   SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
   SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
   SDL_RenderDrawLine(renderer, x, (y+h), x, y);
-  writeText("...", regularText, alarmColor);
+  renderText("...", regularText, blackColor);
   render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
 
   if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && cycleCounter != cycleCheck)
   {
     cycleCheck = cycleCounter;
     
-    pageNumber = gotoNum;
+    status = gotoNum;
     if(pageNumber == 1)
     {
       page_main_FirstLoad = 1;
@@ -400,10 +560,11 @@ void admin(int x, int y, int w, int h, int gotoNum)
     {
       page_settings_FirstLoad = 1;
     }
-    memset(&passText[0], 0, 5);
+    /* memset(&passText[0], 0, 5); enable if using keypad*/ 
   }
 }
 
+/*
 void DrawCircle(SDL_Renderer *Renderer, s32 _x, s32 _y, s32 radius)
 { 
    s32 x = radius - 1;
@@ -438,4 +599,4 @@ void DrawCircle(SDL_Renderer *Renderer, s32 _x, s32 _y, s32 radius)
    }
 }
 
-
+*/

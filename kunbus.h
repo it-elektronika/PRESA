@@ -115,7 +115,7 @@ int piControlGetBitValue(SPIValue *pSpiValue);
 int piControlRead(uint32_t Offset, uint32_t Length, uint8_t *pData);
 
 
-uint16_t readVariableValue(const char *pszVariableName);
-void writeVariableValue(const char *pszVariableName, uint32_t i32uValue);
+extern uint16_t readVariableValue(const char *pszVariableName);
+extern void writeVariableValue(const char *pszVariableName, uint32_t i32uValue);
 
 
