@@ -45,3 +45,6 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum);
 void renderStatOne();
 void renderContent();
 void touchUpdate();
+void up_button(int x, int y, int *incrementee, int incrementor);
+void down_button(int x, int y, int *decrementee, int decrementor);
+void button_save(int x, int y, int w, int h, int sel);

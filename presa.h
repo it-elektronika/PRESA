@@ -1,3 +1,8 @@
+extern FILE *fp_sens;
+extern FILE *fp_curr;
+extern char *line;
+extern size_t len;
+
 extern int status;
 extern int regime;
 
@@ -37,5 +42,7 @@ extern int dustHigh;
 extern int dustLow;
 extern int encoder;
 
+extern int program;
 
 extern void readSensors();
+extern void readParams(int *pageFirstLoad);

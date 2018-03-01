@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int status = 1;
 int regime = 1;
 
@@ -21,7 +23,7 @@ char marginValue[50];
 char savedPlus[50];
 char currentPlus[50];
 char currentText[10];
-int setCurrent;
+int setCurrent = 10000;
 
 int margin;
 int currentMargin;
@@ -39,5 +41,11 @@ int screwdLow = 110;
 int dustHigh = 299;
 int dustLow = 111;
 
+int program = 1;
+
 int PiControlHandle_g = -1;
 
+FILE *fp_sens;
+FILE *fp_curr;
+char *line;
+size_t len;

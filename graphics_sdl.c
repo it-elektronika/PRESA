@@ -1,9 +1,10 @@
+#include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include "graphics_sdl.h"
 #include "presa.h"
-
+#include "kunbus.h"
 int init()    /* things needed to start sdl2 properly */
 {
 
@@ -140,7 +141,9 @@ void renderStatusBar()
   SDL_RenderDrawLine(renderer, 0, 50, 1200, 50);
   SDL_RenderDrawLine(renderer, 0, 0, 1200, 0);
   SDL_RenderDrawLine(renderer, 0, 0, 0, 50);
-  
+ 
+ 
+
   switch(regime)
   {
     case 1:
@@ -175,6 +178,9 @@ void renderStatOne()
   int s_count;
   sens_c = 0;
   y = 200;
+  readParams(&page_main_FirstLoad);
+  renderAdmin(1200, 0, 75, 50, 5);
+
   SDL_RenderDrawRect(renderer, &bar1);
   SDL_RenderDrawRect(renderer, &bar2);
   
@@ -237,11 +243,18 @@ void renderStatOne()
 
 void renderSettings()
 {
+  readParams(&page_settings_FirstLoad);
+  renderAdmin(1200, 0, 75, 50,1); 
+ 
   sprintf(currentValue, "TRENUTNA VREDNOST: %d", sensorsValue[0]);
   sprintf(marginValue, "TOLERANCA: %d ", currentMargin);
   sprintf(currentPlus, "TRENUTNA MAKSIMALNA DOVOLJENA VREDNOST: %d", sensorsValue[0] + currentMargin);
   sprintf(savedPlus, "SHRANJENA MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
-  
+  sprintf(currentText, "NASTAVITEV NAPETOSTI: %d V", setCurrent/1000);
+
+  renderText(currentText, regularText, blackColor);
+  render(100, 500, NULL, 0.0, NULL, SDL_FLIP_NONE);
+   
   renderText(currentValue, regularText, blackColor);
   render(100, 100, NULL, 0.0, NULL, SDL_FLIP_NONE);
   
@@ -253,16 +266,31 @@ void renderSettings()
   
   renderText(savedPlus, regularText, blackColor);
   render(100, 400, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+  up_button(400, 190, &currentMargin, 100);
+  down_button(500, 190, &currentMargin, 100);
+
+  up_button(600, 500, &setCurrent, 1000);
+  down_button(700, 500, &setCurrent, 1000);
+  button_save(1000, 390, 190, 50, 0);
+  button_save(1000, 500, 190, 50, 1);
+  printf("OUT_ANALOG: %d\n", readVariableValue("OutputValue_1_i04"));
+
 }
 
 void renderContent()
 {
-  switch(status)
+  switch(regime)
   {
     case 1:
       renderStatOne();
       break;
+    case 5:
+      renderSettings();
+      break;
   }
+  oldtimestamp=timestamp;
+  cycleCounter++;
 }
 
 void touchUpdate()   /* handling touch events */
@@ -277,26 +305,18 @@ void touchUpdate()   /* handling touch events */
       touchLocation.y = event.tfinger.y;
     }
   }
+  
+  
 }
 
-/*
 
 
-void up_button(int x,  int y)   
+void up_button(int x,  int y, int *incrementee, int incrementor)   
 {
   SDL_Surface *imageSurface;
   freeTexture();
-  imageSurface = IMG_Load("/home/pi/presa_program/up.png");
+  imageSurface = IMG_Load("/home/pi/PRESA/images/up_black.png");
 
-  if(imageSurface == NULL)
-  {
-    printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
-  }
-  else
-  {
-    texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
-    imageSurface = IMG_Load("/home/pi/presa_program/up.png");
-  }
   if(imageSurface == NULL)
   {
     printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
@@ -317,22 +337,23 @@ void up_button(int x,  int y)
   }
 
   render(x, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-  
+
   if(touchLocation.x > x && touchLocation.x < x+100 && touchLocation.y > y && touchLocation.y < y + 100 && timestamp > oldtimestamp)
   {
-    if(currentMargin <= 9000)
+    
+    if(*incrementee <= 9000)
     {
-      currentMargin = currentMargin + 100;
+      *incrementee = *incrementee + incrementor;
     }
   }
 }
 
 
-void down_button(int x, int y)     
+void down_button(int x, int y, int *decrementee, int decrementor)     
 {
   SDL_Surface *imageSurface;
   freeTexture();
-  imageSurface = IMG_Load("/home/pi/presa_program/down.png");
+  imageSurface = IMG_Load("/home/pi/PRESA/images/down_black.png");
 
   if(imageSurface == NULL)
   {
@@ -356,131 +377,46 @@ void down_button(int x, int y)
 
   if(touchLocation.x > x && touchLocation.x < x+100 && touchLocation.y > y && touchLocation.y < y + 100 && timestamp > oldtimestamp)
   {
-    if(currentMargin > 0)
+    if(*decrementee > 0)
     {
-      currentMargin = currentMargin - 100;
-    }
-  }
-}
-
-void up_button_curr(int x,  int y)   
-{
-  SDL_Surface *imageSurface;
-  freeTexture();
-  imageSurface = IMG_Load("/home/pi/presa_program/up.png");
-
-  if(imageSurface == NULL)
-  {
-    printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
-  }
-  else
-  {
-    texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
-    imageSurface = IMG_Load("/home/pi/presa_program/up.png");
-  }
-  if(imageSurface == NULL)
-  {
-    printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
-  }
-  else
-  {
-    texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
-    if(texture == NULL)
-    {
-      printf("Unable to create texture from rendered image! SDL_ImageError: %s\n", SDL_GetError());
-    }
-    else
-    {
-      textureWidth = imageSurface -> w;
-      textureHeight = imageSurface -> h;
-    }
-    SDL_FreeSurface(imageSurface);
-  }
-
-  render(x, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-  
-  if(touchLocation.x > x && touchLocation.x < x+100 && touchLocation.y > y && touchLocation.y < y + 100 && timestamp > oldtimestamp)
-  {
-    if(setCurrent <= 9000)
-    {
-      setCurrent = setCurrent + 1000;
+     *decrementee = *decrementee - decrementor;
     }
   }
 }
 
 
-void down_button_curr(int x, int y)   
+
+void button_save(int x, int y, int w, int h, int sel)  
 {
-  SDL_Surface *imageSurface;
-  freeTexture();
-  imageSurface = IMG_Load("/home/pi/presa_program/down.png");
-
-  if(imageSurface == NULL)
-  {
-    printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
-  }
-  else
-  {
-    texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
-    if(texture == NULL)
-    {
-      printf("Unable to create texture from rendered image! SDL_ImageError: %s\n", SDL_GetError());
-    }
-    else
-    {
-      textureWidth = imageSurface -> w;
-      textureHeight = imageSurface -> h;
-    }
-    SDL_FreeSurface(imageSurface);
-  }	
-  render(x, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-
-  if(touchLocation.x > x && touchLocation.x < x+100 && touchLocation.y > y && touchLocation.y < y + 100 && timestamp > oldtimestamp)
-  {
-    if(setCurrent > 0)
-    {
-      setCurrent = setCurrent - 1000;
-    }
-  }
-}
-
-
-void button(int x, int y, int w, int h, const char* text, int gotoNum) 
-{
-  SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
   SDL_RenderDrawLine(renderer, x, y, (x+w), y);
   SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
   SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
   SDL_RenderDrawLine(renderer, x, (y+h), x, y);
-  writeText(text, regularText, textColor);
+  renderText("SHRANI", regularText,  blackColor);
   render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
-  if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
+  if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 0)
   {
-    pageNumber = gotoNum;
+    savedHighThr = sensorsValue[0] + currentMargin;
+    system("rm /home/pi/PRESA/data/param_sens.txt");	  
+    fp_sens = fopen("/home/pi/PRESA/data/param_sens.txt", "w");
+    fprintf(fp_sens, "%d\n", currentMargin);    
+    fprintf(fp_sens, "%d\n", savedHighThr);
+    fclose(fp_sens);
+    
   }
-}
-void button_save(int x, int y, int w, int h)  
-{
-  SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-  SDL_RenderDrawLine(renderer, x, y, (x+w), y);
-  SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
-  SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
-  SDL_RenderDrawLine(renderer, x, (y+h), x, y);
-  writeText("SHRANI", regularText,  alarmColor);
-  render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
-  if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
+  else if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 1)
   {
-    savedHighThr = readVariableValue("InputValue_1") + currentMargin;
-    system("rm param.txt");	  
-    fp = fopen("/home/pi/presa_program/param.txt", "w");
-    fprintf(fp, "%d\n", currentMargin);    
-    fprintf(fp, "%d\n", savedHighThr);
-    fprintf(fp, "%d\n", setCurrent);
-    fclose(fp);
+    system("rm /home/pi/PRESA/data/param_curr.txt");	  
+    fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "w");
+    fprintf(fp_curr, "%d\n", setCurrent);
+    fclose(fp_curr);
     
   }
 }
 
+
+/*
 void keypad(int x, int y, int w, int h) 
 {
   int i = 1;
@@ -551,12 +487,12 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum)
   {
     cycleCheck = cycleCounter;
     
-    status = gotoNum;
-    if(pageNumber == 1)
+    regime = gotoNum;
+    if(regime == 1)
     {
       page_main_FirstLoad = 1;
     }
-    else if(pageNumber == 2)
+    else if(regime == 5)
     {
       page_settings_FirstLoad = 1;
     }

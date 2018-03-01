@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdint.h>
-#include "presa.h"
-#include <math.h>
-#include "kunbus.h"
 #include <stdlib.h>
 #include <unistd.h>
-
-
+#include <math.h>
+#include "presa.h"
+#include "kunbus.h"
+#include "graphics_sdl.h"
 void readSensors()  /* handling struct for drawing grids */
 {  
   int i;
@@ -44,4 +43,50 @@ void readSensors()  /* handling struct for drawing grids */
       sensorsDust[i] = 0;
     }
   }
+}
+
+void readParams(int *pageFirstLoad)
+{
+  int i;
+  fp_sens = fopen("/home/pi/PRESA/data/param_sens.txt", "r");
+  fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "r");
+
+  if(*pageFirstLoad) 
+  {
+    for(i = 0; i < 3; ++i)
+    {
+      getline(&line, &len, fp_sens);
+  
+      if(i==0)
+      {
+        margin = atoi(line);
+      }
+      else if(i==1)
+      {
+        savedHighThr=atoi(line);
+      }
+    }
+    currentMargin = margin;
+ 
+    for(i = 0; i < 1; ++i)
+    { 
+      getline(&line, &len, fp_curr);
+      if(i==0)
+      {
+        setCurrent=atoi(line);
+        writeVariableValue("OutputValue_1_i04", setCurrent); 
+      }
+    }
+    *pageFirstLoad = 0;    
+  }
+}
+
+
+void readButtons()
+{
+  if(readVariableValue("I_1") == 1)
+  {
+    regime == 1;
+  }  
+   
 }

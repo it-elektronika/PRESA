@@ -4,16 +4,16 @@
 int main()
 {
   init();
-  while(1)
+  while(program == 1)
   {
     touchUpdate();
     renderBackground();
     renderStatusBar();
-    renderAdmin(1200, 0, 75, 50, 5);
     readSensors();
-    renderStatOne();
     renderContent();
     SDL_RenderPresent(renderer);
+    printf("x: %d y: %d\n", touchLocation.x, touchLocation.y);
+    printf("status: %d, regime: %d\n", status, regime);
   }
   return 0;
 }
