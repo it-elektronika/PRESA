@@ -48,8 +48,8 @@ void readSensors()  /* handling struct for drawing grids */
 void readParams(int *pageFirstLoad)
 {
   int i;
-  fp_sens = fopen("/home/pi/PRESA/data/param_sens.txt", "r");
-  fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "r");
+  fp_sens = fopen("/home/luka/PRESA/data/param_sens.txt", "r");
+  fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "r");
 
   if(*pageFirstLoad) 
   {
@@ -86,7 +86,7 @@ void readButtons()
 {
   if(readVariableValue("I_1") == 1)
   {
-    regime == 1;
+    regime = 1;
   }  
    
 }

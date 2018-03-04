@@ -5,6 +5,7 @@
 #include "graphics_sdl.h"
 #include "presa.h"
 #include "kunbus.h"
+
 int init()    /* things needed to start sdl2 properly */
 {
 
@@ -46,16 +47,31 @@ int init()    /* things needed to start sdl2 properly */
     printf("TTF ERROR\n");
   }
   
-  smallText = TTF_OpenFont("/home/pi/presa_program/DejaVuSansMono.ttf", 15);
+  #ifdef RPI
+  smallText = TTF_OpenFont("/home/pi/PRESA/font/DejaVuSansMono.ttf", 15);
   if(smallText == NULL)
   {
     printf("NO FONT FOUND\n");
   }
-  regularText = TTF_OpenFont("/home/pi/presa_program/DejaVuSansMono.ttf", 30);
+  regularText = TTF_OpenFont("/home/pi/PRESA/font/DejaVuSansMono.ttf", 30);
   if(regularText == NULL)
   {
     printf("NO FONT FOUND\n");
   }
+  #endif
+  
+  #ifdef LUKA
+  smallText = TTF_OpenFont("/home/luka/PRESA/font/DejaVuSansMono.ttf", 15);
+  if(smallText == NULL)
+  {
+    printf("NO FONT FOUND\n");
+  }
+  regularText = TTF_OpenFont("/home/luka/PRESA/font/DejaVuSansMono.ttf", 30);
+  if(regularText == NULL)
+  {
+    printf("NO FONT FOUND\n");
+  }
+  #endif
   return 15;
 }
 
@@ -141,8 +157,6 @@ void renderStatusBar()
   SDL_RenderDrawLine(renderer, 0, 50, 1200, 50);
   SDL_RenderDrawLine(renderer, 0, 0, 1200, 0);
   SDL_RenderDrawLine(renderer, 0, 0, 0, 50);
- 
- 
 
   switch(regime)
   {
@@ -179,7 +193,7 @@ void renderStatOne()
   sens_c = 0;
   y = 200;
   readParams(&page_main_FirstLoad);
-  renderAdmin(1200, 0, 75, 50, 5);
+  renderAdmin(1200, 0, 80, 50, 5);
 
   SDL_RenderDrawRect(renderer, &bar1);
   SDL_RenderDrawRect(renderer, &bar2);
@@ -252,6 +266,9 @@ void renderSettings()
   sprintf(savedPlus, "SHRANJENA MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
   sprintf(currentText, "NASTAVITEV NAPETOSTI: %d V", setCurrent/1000);
 
+  up_button(600, 500, &setCurrent, 1000);
+  down_button(700, 500, &setCurrent, 1000);
+
   renderText(currentText, regularText, blackColor);
   render(100, 500, NULL, 0.0, NULL, SDL_FLIP_NONE);
    
@@ -270,19 +287,54 @@ void renderSettings()
   up_button(400, 190, &currentMargin, 100);
   down_button(500, 190, &currentMargin, 100);
 
-  up_button(600, 500, &setCurrent, 1000);
-  down_button(700, 500, &setCurrent, 1000);
   button_save(1000, 390, 190, 50, 0);
   button_save(1000, 500, 190, 50, 1);
   printf("OUT_ANALOG: %d\n", readVariableValue("OutputValue_1_i04"));
 
 }
 
+void renderTurnSelect()
+{
+  int i;
+  sprintf(currentText, "NASTAVITEV NAPETOSTI: %d V", setCurrent/1000);
+
+  up_button(900, 690, &setCurrent, 1000);
+  down_button(1000, 690, &setCurrent, 1000);
+
+  renderText(currentText, regularText, blackColor);
+  render(300, 700, NULL, 0.0, NULL, SDL_FLIP_NONE);
+ 
+  left_button(400, 250);
+  right_button(700, 250); 
+  
+  for(i = 0; i < 10; i++)
+  {
+    SDL_RenderDrawLine(renderer, 0, 600+i, 1280, 600+i);
+  }
+}
+
+void renderModeSelect()
+{
+  button(400, 200, 200, 200, "MODE 1", 0);
+  button(650, 200, 200, 200, "MODE 2", 1);
+  button(400, 450, 200, 200, "MODE 3", 2);
+  button(650, 450, 200, 200, "MODE 4", 3);
+
+}
+
+
+ 
+
+
 void renderContent()
 {
   switch(regime)
   {
     case 1:
+      renderModeSelect();
+      /*renderTurnSelect();*/
+      break;
+    case 2:
       renderStatOne();
       break;
     case 5:
@@ -297,12 +349,20 @@ void touchUpdate()   /* handling touch events */
 {
   while(SDL_PollEvent(&event) != 0 )
   {
+    /*
     if(event.type == SDL_FINGERDOWN)  
     {
       
       timestamp = event.tfinger.timestamp;
       touchLocation.x = event.tfinger.x;
       touchLocation.y = event.tfinger.y;
+    }
+    */
+    if(event.type == SDL_MOUSEBUTTONDOWN)
+    {
+      timestamp = event.button.timestamp;
+      touchLocation.x = event.button.x;
+      touchLocation.y = event.button.y;
     }
   }
   
@@ -315,8 +375,12 @@ void up_button(int x,  int y, int *incrementee, int incrementor)
 {
   SDL_Surface *imageSurface;
   freeTexture();
+  #ifdef RPI
   imageSurface = IMG_Load("/home/pi/PRESA/images/up_black.png");
-
+  #endif
+  #ifdef LUKA
+  imageSurface = IMG_Load("/home/luka/PRESA/images/up_black.png");
+  #endif
   if(imageSurface == NULL)
   {
     printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
@@ -353,8 +417,12 @@ void down_button(int x, int y, int *decrementee, int decrementor)
 {
   SDL_Surface *imageSurface;
   freeTexture();
+  #ifdef RPI
   imageSurface = IMG_Load("/home/pi/PRESA/images/down_black.png");
-
+  #endif
+  #ifdef LUKA
+  imageSurface = IMG_Load("/home/luka/PRESA/images/down_black.png");
+  #endif
   if(imageSurface == NULL)
   {
     printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
@@ -384,8 +452,116 @@ void down_button(int x, int y, int *decrementee, int decrementor)
   }
 }
 
+void left_button(int x,  int y)   
+{
+  SDL_Surface *imageSurface;
+  freeTexture();
+  #ifdef RPI
+  imageSurface = IMG_Load("/home/pi/PRESA/images/left_200_black.png");
+  #endif
+  #ifdef LUKA
+  imageSurface = IMG_Load("/home/luka/PRESA/images/left_200_black.png");
+  #endif
+  
+  if(imageSurface == NULL)
+  {
+    printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
+  }
+  else
+  {
+    texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
+    if(texture == NULL)
+    {
+      printf("Unable to create texture from rendered image! SDL_ImageError: %s\n", SDL_GetError());
+    }
+    else
+    {
+      textureWidth = imageSurface -> w;
+      textureHeight = imageSurface -> h;
+    }
+    SDL_FreeSurface(imageSurface);
+  }
 
+  render(x, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+  if(touchLocation.x > x && touchLocation.x < x+imageSurface->w && touchLocation.y > y && touchLocation.y < y + imageSurface->h && timestamp > oldtimestamp)
+  {
+    if(left_button_selected == 0 && right_button_selected == 0)
+    {
+      left_button_selected = 1;
+    }
+    else
+    {
+      left_button_selected = 0;
+    }
+  }
 
+  if(left_button_selected == 1)
+  {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderDrawLine(renderer, x, y, (x+imageSurface->w), y);
+    SDL_RenderDrawLine(renderer, (x+imageSurface->w), y, (x+imageSurface->w), (y+imageSurface->h)); 
+    SDL_RenderDrawLine(renderer, (x+imageSurface->w), (y+imageSurface->h), x, (y+imageSurface->h));
+    SDL_RenderDrawLine(renderer, x, (y+imageSurface->h), x, y);
+  }
+
+  
+}
+
+void right_button(int x,  int y)   
+{
+  SDL_Surface *imageSurface;
+  freeTexture();
+  #ifdef RPI
+  imageSurface = IMG_Load("/home/pi/PRESA/images/right_200_black.png");
+  #endif
+  #ifdef LUKA
+  imageSurface = IMG_Load("/home/luka/PRESA/images/right_200_black.png");
+  #endif
+  
+  if(imageSurface == NULL)
+  {
+    printf("Unable to render image surface! SDL_ImageError: %s\n", IMG_GetError());
+  }
+  else
+  {
+    texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
+    if(texture == NULL)
+    {
+      printf("Unable to create texture from rendered image! SDL_ImageError: %s\n", SDL_GetError());
+    }
+    else
+    {
+      textureWidth = imageSurface -> w;
+      textureHeight = imageSurface -> h;
+    }
+    SDL_FreeSurface(imageSurface);
+  }
+
+  render(x, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+  if(touchLocation.x > x && touchLocation.x < x+imageSurface->w && touchLocation.y > y && touchLocation.y < y + imageSurface->h && timestamp > oldtimestamp)
+  {
+    if(right_button_selected == 0 && left_button_selected == 0)
+    {
+      right_button_selected = 1;
+    }
+    else
+    {
+      right_button_selected = 0;
+    }
+  }
+
+  if(right_button_selected == 1)
+  {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderDrawLine(renderer, x, y, (x+imageSurface->w), y);
+    SDL_RenderDrawLine(renderer, (x+imageSurface->w), y, (x+imageSurface->w), (y+imageSurface->h)); 
+    SDL_RenderDrawLine(renderer, (x+imageSurface->w), (y+imageSurface->h), x, (y+imageSurface->h));
+    SDL_RenderDrawLine(renderer, x, (y+imageSurface->h), x, y);
+  }
+ 
+}
 void button_save(int x, int y, int w, int h, int sel)  
 {
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -398,8 +574,14 @@ void button_save(int x, int y, int w, int h, int sel)
   if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 0)
   {
     savedHighThr = sensorsValue[0] + currentMargin;
+    #ifdef RPI
     system("rm /home/pi/PRESA/data/param_sens.txt");	  
     fp_sens = fopen("/home/pi/PRESA/data/param_sens.txt", "w");
+    #endif
+    #ifdef LUKA
+    system("rm /home/luka/PRESA/data/param_sens.txt");	  
+    fp_sens = fopen("/home/luka/PRESA/data/param_sens.txt", "w");
+    #endif
     fprintf(fp_sens, "%d\n", currentMargin);    
     fprintf(fp_sens, "%d\n", savedHighThr);
     fclose(fp_sens);
@@ -407,14 +589,77 @@ void button_save(int x, int y, int w, int h, int sel)
   }
   else if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 1)
   {
+    #ifdef RPI
     system("rm /home/pi/PRESA/data/param_curr.txt");	  
     fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "w");
+    #endif
+    #ifdef LUKA
+    system("rm /home/luka/PRESA/data/param_curr.txt");	  
+    fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "w");
+    #endif
     fprintf(fp_curr, "%d\n", setCurrent);
     fclose(fp_curr);
     
   }
 }
 
+void button(int x, int y, int w, int h, char *text, int id)  /* save row/column data button */
+{
+  int i;
+  
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  for(i = 0; i < 4; i++)
+  {
+       printf("selected: %d, %d\n", id, selected[id]);
+  }
+  printf("################\n");
+
+  if(selected[id] == 0)
+  {
+    SDL_RenderDrawLine(renderer, x, y, (x+w), y);
+    SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
+    SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
+    SDL_RenderDrawLine(renderer, x, (y+h), x, y);
+  }
+  if(selected[id] == 1)
+  {
+    for(i = 0; i < 10; i++)
+    {
+      SDL_RenderDrawLine(renderer, x, y+i, (x+w), y+i);
+      SDL_RenderDrawLine(renderer, (x+w+i), y, (x+w+i), (y+h)); 
+      SDL_RenderDrawLine(renderer, (x+w), (y+h-i), x, (y+h-i));
+      SDL_RenderDrawLine(renderer, x+i, (y+h), x+i, y);      
+    }
+  }
+
+  renderText(text, regularText, blackColor);
+  render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
+  
+  if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
+  {
+    for(i = 0; i < 4; i++)
+    {
+      
+      if(selected[i] == 1)
+      {
+        noButtonSelected = 0;
+        break;
+      }
+      else if(selected[i] == 0)
+      {  
+        noButtonSelected = 1;
+      }
+    }
+    if(selected[id] == 0 && noButtonSelected == 1) 
+    {
+      selected[id] = 1;
+    }
+    else if(selected[id] == 1)
+    {
+      selected[id] = 0;
+    }
+  }
+}
 
 /*
 void keypad(int x, int y, int w, int h) 

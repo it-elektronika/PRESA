@@ -34,4 +34,8 @@ int cycleCheck = 0;
 int page_main_FirstLoad = 1;
 int page_settings_FirstLoad = 1;
 
+int left_button_selected = 0;
+int right_button_selected = 0;
 
+int selected[5];
+int noButtonSelected = 1;

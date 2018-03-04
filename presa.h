@@ -25,7 +25,7 @@ extern char currentValue[50];
 extern char marginValue[50];
 extern char savedPlus[50];
 extern char currentPlus[50];
-extern char currentText[10];
+extern char currentText[40];
 extern int setCurrent;
 
 extern int margin;

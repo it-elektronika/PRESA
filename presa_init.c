@@ -22,7 +22,7 @@ char currentValue[50];
 char marginValue[50];
 char savedPlus[50];
 char currentPlus[50];
-char currentText[10];
+char currentText[40];
 int setCurrent = 10000;
 
 int margin;
