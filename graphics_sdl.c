@@ -92,15 +92,15 @@ void freeTexture(void)
 void renderBackground(void)     
 {
 
-  switch(status)
+  switch(backgroundColor)
   {
+    case 0:
+      SDL_SetRenderDrawColor(renderer, 0, 178, 0, 255);
+      break;
     case 1:
       SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
       break;
     case 2:
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-      break;
-    case 3:
       SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
       break;
   }
@@ -158,42 +158,54 @@ void renderStatusBar()
   SDL_RenderDrawLine(renderer, 0, 0, 1200, 0);
   SDL_RenderDrawLine(renderer, 0, 0, 0, 50);
 
-  switch(regime)
+  switch(sbarText)
   {
+    case 0:
+      renderText("POMIKANJE V IZHODISCE", regularText, blackColor); 
+      break;
+
     case 1:
-      renderText("STATUS: MIROVANJE", regularText, blackColor); 
+      renderText("ROCNO POMIKANJE", regularText, blackColor);
       break;
 
     case 2:
-      renderText("STATUS: DELOVANJE", regularText, whiteColor);
+      renderText("POLAVTOMATSK NACIN", regularText, blackColor);
       break;
 
     case 3:
-      renderText("STATUS: DELOVANJE - polavtomatsko", regularText, whiteColor);
-      break;
-
-    case 4:
-      renderText("STATUS: NAPAKA", regularText, whiteColor);
+      renderText("AVTOMATSKI NACIN", regularText, blackColor);
       break;
     
-    case 5: 
-      renderText("NASTAVITVE", regularText, blackColor);
+    case 4: 
+      renderText("IZBIRA SMERI VRTENJA", regularText, blackColor);
       break;
+
+    case 5: 
+      renderText("IZBIRA NACINA DELOVANJA", regularText, blackColor);
+      break;    
+
+    case 6: 
+      renderText("NASTAVITVE", regularText, blackColor);
+      break;    
+    
+    case 7: 
+      renderText("NAPAKA", regularText, blackColor);
+      break;    
   } 
   render(100, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
 }
 
-void renderStatOne()
+void renderInCycle()
 {
   int i;
   int y;
   int sens_c;
   int count_num;
   int s_count;
+  
   sens_c = 0;
   y = 200;
   readParams(&page_main_FirstLoad);
-  renderAdmin(1200, 0, 80, 50, 5);
 
   SDL_RenderDrawRect(renderer, &bar1);
   SDL_RenderDrawRect(renderer, &bar2);
@@ -264,13 +276,6 @@ void renderSettings()
   sprintf(marginValue, "TOLERANCA: %d ", currentMargin);
   sprintf(currentPlus, "TRENUTNA MAKSIMALNA DOVOLJENA VREDNOST: %d", sensorsValue[0] + currentMargin);
   sprintf(savedPlus, "SHRANJENA MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
-  sprintf(currentText, "NASTAVITEV NAPETOSTI: %d V", setCurrent/1000);
-
-  up_button(600, 500, &setCurrent, 1000);
-  down_button(700, 500, &setCurrent, 1000);
-
-  renderText(currentText, regularText, blackColor);
-  render(100, 500, NULL, 0.0, NULL, SDL_FLIP_NONE);
    
   renderText(currentValue, regularText, blackColor);
   render(100, 100, NULL, 0.0, NULL, SDL_FLIP_NONE);
@@ -288,8 +293,6 @@ void renderSettings()
   down_button(500, 190, &currentMargin, 100);
 
   button_save(1000, 390, 190, 50, 0);
-  button_save(1000, 500, 190, 50, 1);
-  printf("OUT_ANALOG: %d\n", readVariableValue("OutputValue_1_i04"));
 
 }
 
@@ -315,30 +318,219 @@ void renderTurnSelect()
 
 void renderModeSelect()
 {
-  button(400, 200, 200, 200, "MODE 1", 0);
-  button(650, 200, 200, 200, "MODE 2", 1);
-  button(400, 450, 200, 200, "MODE 3", 2);
-  button(650, 450, 200, 200, "MODE 4", 3);
+  button(280, 100, 360, 300, "POMIK V IZHODISCE", 0);
+  button(680, 100, 360, 300, "ROCNI NACIN", 1);
+  button(280, 450, 360, 300, "POLAVTOMATSKI NACIN", 2);
+  button(680, 450, 360, 300, "AVTOMATSKI NACIN", 3);
+}
 
+void renderErrorMode1()
+{
+  int i;
+  int y;
+  int count_num;
+  int s_count;
+  int sens_c;
+  int blinkCounter;
+
+  blinkCounter = 1;
+  sprintf(encoderVal, "ENCODER: %d", encoder);
+  renderText(encoderVal, smallText,  blackColor);
+  render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
+  renderText(savedPlus, smallText, blackColor);
+  render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);   
+    
+  y = 180;
+  count_num = 0;
+  s_count = 1;
+
+  for(i = 0; i < 5; i++)
+  {
+    if(sensors[count_num] > 0 && blinkCounter > 10)
+    {
+      sprintf(sensorVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+      renderText(sensorVals[count_num], regularText, blackColor);
+      render(500, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    else if(sensors[count_num] < 1)
+    {
+      sprintf(sensorVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+      renderText(sensorVals[count_num], regularText, blackColor);
+      render(500, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    y = y + 100;
+    count_num = count_num + 2;
+    s_count = s_count + 2;
+  }
+  y = 180;
+  count_num = 1;
+  s_count = 2;
+
+  for(i = 0; i < 5; i++)
+  {
+    if(sensors[count_num] > 0 && blinkCounter > 10)
+    {
+      sprintf(sensorVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+      renderText(sensorVals[count_num], regularText, blackColor);
+      render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    else if(sensors[count_num] < 1)
+    {
+      sprintf(sensorVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+      renderText(sensorVals[count_num], regularText, blackColor);
+      render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    y = y + 100;
+    count_num = count_num + 2;
+    s_count = s_count + 2;
+  }
+    
+  if(blinkCounter > 50)  
+  {
+    blinkCounter = 0;
+  }
+  blinkCounter++;
+    
+  for(i = 0; i < 5; i++)
+  {
+    if(sensors[sens_c] > 0 || sensors[sens_c+1] > 0)
+    {
+      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      SDL_RenderFillRect(renderer, &holes[i]);
+    }
+    else
+    {
+      SDL_RenderDrawRect(renderer, &holes[i]);
+    }
+    sens_c = sens_c + 2;
+  }
+}
+
+void renderErrorMode2()
+{
+  int i;
+  int y;
+  int count_num;
+  int s_count;
+  int sens_c;
+  int blinkCounter;
+
+  blinkCounter = 1;
+  sprintf(encoderVal, "ENCODER: %d", encoder);
+  renderText(encoderVal, smallText,  blackColor);
+  render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
+  renderText(savedPlus, smallText, blackColor);
+  render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);   
+    
+  y = 180;
+  count_num = 0;
+  s_count = 1;
+
+  for(i = 0; i < 5; i++)
+  {
+    if(sensorsDust[count_num] > 0 && blinkCounter > 10)
+    {
+      sprintf(sensorDustVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+      renderText(sensorDustVals[count_num], regularText, blackColor);
+      render(500, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    else if(sensorsDust[count_num] < 1)
+    {
+      sprintf(sensorDustVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+      renderText(sensorDustVals[count_num], regularText, blackColor);
+      render(500, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    y = y + 100;
+    count_num = count_num + 2;
+    s_count = s_count + 2;
+  }
+  y = 180;
+  count_num = 1;
+  s_count = 2;
+
+  for(i = 0; i < 5; i++)
+  {
+    if(sensorsDust[count_num] > 0 && blinkCounter > 10)
+    {
+      sprintf(sensorDustVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+      renderText(sensorDustVals[count_num], regularText, blackColor);
+      render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    else if(sensorsDust[count_num] < 1)
+    {
+      sprintf(sensorDustVals[count_num], "S%d: %d", s_count, sensorsValue[count_num]);
+      renderText(sensorDustVals[count_num], regularText, blackColor);
+      render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    }
+    y = y + 100;
+    count_num = count_num + 2;
+    s_count = s_count + 2;
+  }
+    
+  if(blinkCounter > 50)  
+  {
+    blinkCounter = 0;
+  }
+  blinkCounter++;
+    
+  for(i = 0; i < 5; i++)
+  {
+    if(sensorsDust[sens_c] > 0 || sensorsDust[sens_c+1] > 0)
+    {
+      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      SDL_RenderFillRect(renderer, &holes[i]);
+    }
+    else
+    {
+      SDL_RenderDrawRect(renderer, &holes[i]);
+    }
+    sens_c = sens_c + 2;
+  }
 }
 
 
- 
+void renderError()
+{
+  switch(errorMode)
+  {
+    case 1:
+      renderErrorMode1();
+      break;
+    case 2:
+      renderErrorMode2();      
+      break; 
+  }
+}
+
 
 
 void renderContent()
 {
-  switch(regime)
+  switch(page)
   {
+    case 0:
+      backgroundColor = 1;
+      renderTurnSelect();
+      break;
     case 1:
+      backgroundColor = 1;
       renderModeSelect();
-      /*renderTurnSelect();*/
       break;
     case 2:
-      renderStatOne();
+      backgroundColor = 0;
+      renderInCycle();
       break;
-    case 5:
+    case 3:
+      backgroundColor = 1;
       renderSettings();
+      break;
+    case 4:
+      backgroundColor = 2;
+      renderError();
       break;
   }
   oldtimestamp=timestamp;
@@ -349,7 +541,7 @@ void touchUpdate()   /* handling touch events */
 {
   while(SDL_PollEvent(&event) != 0 )
   {
-    /*
+    
     if(event.type == SDL_FINGERDOWN)  
     {
       
@@ -357,13 +549,13 @@ void touchUpdate()   /* handling touch events */
       touchLocation.x = event.tfinger.x;
       touchLocation.y = event.tfinger.y;
     }
-    */
+    /*
     if(event.type == SDL_MOUSEBUTTONDOWN)
     {
       timestamp = event.button.timestamp;
       touchLocation.x = event.button.x;
       touchLocation.y = event.button.y;
-    }
+    }*/
   }
   
   
@@ -608,10 +800,7 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
   int i;
   
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-  for(i = 0; i < 4; i++)
-  {
-       printf("selected: %d, %d\n", id, selected[id]);
-  }
+  printf("selected: %d, %d\n", id, selected[id]);
   printf("################\n");
 
   if(selected[id] == 0)
@@ -657,6 +846,7 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
     else if(selected[id] == 1)
     {
       selected[id] = 0;
+      sbarText = 5;
     }
   }
 }
@@ -732,12 +922,12 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum)
   {
     cycleCheck = cycleCounter;
     
-    regime = gotoNum;
-    if(regime == 1)
+    page = gotoNum;
+    if(page == 1)
     {
       page_main_FirstLoad = 1;
     }
-    else if(regime == 5)
+    else if(page == 5)
     {
       page_settings_FirstLoad = 1;
     }

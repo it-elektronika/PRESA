@@ -1,7 +1,8 @@
 #include <stdio.h>
 
-int status = 1;
-int regime = 1;
+int page = 0;
+int sbarText = 4;
+int backgroundColor = 1;
 
 int sensors[11];
 int sensorsValue[10];
@@ -29,7 +30,7 @@ int margin;
 int currentMargin;
 int highThr;
 int savedHighThr;
-
+int errorMode = 0;
 int encoder;
 
 float divisor = 44.441666667;

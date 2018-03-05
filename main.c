@@ -10,10 +10,11 @@ int main()
     renderBackground();
     renderStatusBar();
     readSensors();
+    logicTree();
     renderContent();
     SDL_RenderPresent(renderer);
     printf("x: %d y: %d\n", touchLocation.x, touchLocation.y);
-    printf("status: %d, regime: %d\n", status, regime);
+    printf("page: %d, sbText: %d\n", page, sbarText);
   }
   return 0;
 }

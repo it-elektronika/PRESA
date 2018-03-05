@@ -38,4 +38,5 @@ int left_button_selected = 0;
 int right_button_selected = 0;
 
 int selected[5];
+int id;
 int noButtonSelected = 1;

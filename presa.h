@@ -3,8 +3,9 @@ extern FILE *fp_curr;
 extern char *line;
 extern size_t len;
 
-extern int status;
-extern int regime;
+extern int sbarText;
+extern int page;
+extern int backgroundColor;
 
 extern int sensors[11];
 extern int sensorsValue[10];
@@ -28,6 +29,8 @@ extern char currentPlus[50];
 extern char currentText[40];
 extern int setCurrent;
 
+extern int errorMode;
+
 extern int margin;
 extern int currentMargin;
 extern int highThr;
@@ -46,3 +49,8 @@ extern int program;
 
 extern void readSensors();
 extern void readParams(int *pageFirstLoad);
+
+extern void checkError();
+extern void checkSelectP0();
+extern void checkSelectP1();
+extern void logicTree();

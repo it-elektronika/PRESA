@@ -6,6 +6,7 @@
 #include "presa.h"
 #include "kunbus.h"
 #include "graphics_sdl.h"
+
 void readSensors()  /* handling struct for drawing grids */
 {  
   int i;
@@ -48,9 +49,15 @@ void readSensors()  /* handling struct for drawing grids */
 void readParams(int *pageFirstLoad)
 {
   int i;
+  
+  #ifdef RPI
+  fp_sens = fopen("/home/pi/PRESA/data/param_sens.txt", "r");
+  fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "r");
+  #endif
+  #ifdef LUKA
   fp_sens = fopen("/home/luka/PRESA/data/param_sens.txt", "r");
   fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "r");
-
+  #endif
   if(*pageFirstLoad) 
   {
     for(i = 0; i < 3; ++i)
@@ -81,12 +88,95 @@ void readParams(int *pageFirstLoad)
   }
 }
 
-
-void readButtons()
+void checkError()
 {
-  if(readVariableValue("I_1") == 1)
+  int i;
+
+  for(i = 0; i < 4; i++)
   {
-    regime = 1;
-  }  
-   
+    if(sensors[i] == 1)
+    {
+      errorMode = 1;
+      break;
+    }
+    else
+    {
+      errorMode = 0;
+    }
+    if(sensorsDust[i]== 1)
+    {
+      errorMode = 2;
+      break;
+    }
+    else
+    {
+      errorMode = 0;
+    }
+  }
+} 
+ 
+void checkSelectP0()
+{
+  if(readVariableValue("I_1"))
+  {
+    if(left_button_selected || right_button_selected)
+    {
+      page = 1;
+    } 
+  }
+}
+
+void checkSelectP1()
+{
+  if(readVariableValue("I_2"))
+  {
+    if(selected[0] == 1)
+    {
+      sbarText = 0;
+    }
+    else if(selected[1] == 1)
+    {
+      sbarText = 1;
+    }
+    else if(selected[2] == 1)
+    {
+      sbarText = 2;
+      page = 2;
+    }
+    else if(selected[3] == 1)
+    {
+      page = 2;
+      sbarText = 3;
+    }
+    else
+    {
+      sbarText = 5;
+    }
+  }
+}
+
+void checkStopCycle()
+{
+  if(readVariableValue("I_3"))
+  {
+    page = 1;
+  }
+}
+
+void logicTree()
+{
+  switch(page)
+  {
+    case 0:
+      checkSelectP0();
+      break;
+
+    case 1:
+      checkSelectP1(); 
+      break; 
+    
+    case 2:
+      checkStopCycle();
+      break;
+  }
 }

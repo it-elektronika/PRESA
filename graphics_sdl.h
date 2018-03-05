@@ -4,7 +4,7 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 800
-#define LUKA 1
+#define RPI 1
 
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;
@@ -32,12 +32,14 @@ extern int cycleCheck;
 extern int page_main_FirstLoad;
 extern int page_settings_FirstLoad;
 
-int left_button_selected;
-int right_button_selected;
+extern int left_button_selected;
+extern int right_button_selected;
 extern int pageNumber;
 
 int selected[4];
 int noButtonSelected;
+extern int id;
+
 int init();
 void freeTexture();
 void renderBackground();
@@ -49,6 +51,9 @@ void renderStatOne();
 void renderContent();
 void renderTurnSelect();
 void renderModeSelect();
+void renderErrorMode1();
+void renderErrorMode2();
+void renderError();
 
 void touchUpdate();
 void up_button(int x, int y, int *incrementee, int incrementor);
