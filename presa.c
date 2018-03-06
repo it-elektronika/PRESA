@@ -12,7 +12,7 @@ void readSensors()  /* handling struct for drawing grids */
   int i;
   encoder = round((readVariableValue("InputValue_1_i04")-substract)/divisor);
 
- /* IF encoder in right position read values */
+  /* IF encoder in right position read values */
   sensorsValue[0] = readVariableValue("InputValue_1");
   sensorsValue[1] = readVariableValue("InputValue_2");
   sensorsValue[2] = readVariableValue("InputValue_3");
@@ -90,28 +90,36 @@ void readParams(int *pageFirstLoad)
 
 void checkError()
 {
-  int i;
-
-  for(i = 0; i < 4; i++)
+  if(page == 2)
   {
-    if(sensors[i] == 1)
+    int i;
+
+    for(i = 0; i < 4; i++)
     {
-      errorMode = 1;
-      break;
+      if(sensors[i] == 1)
+      {
+        errorMode = 1;
+        page = 4;
+        sbarText = 7;
+        break;
+      }
+      else
+      {
+        errorMode = 0;
+      }
+      if(sensorsDust[i]== 1)
+      {
+        errorMode = 2;
+        page = 4;
+        sbarText = 8;
+        break;
+      }
+      else
+      {
+        errorMode = 0;
+      }
     }
-    else
-    {
-      errorMode = 0;
-    }
-    if(sensorsDust[i]== 1)
-    {
-      errorMode = 2;
-      break;
-    }
-    else
-    {
-      errorMode = 0;
-    }
+    printf("ERROR MODE: %d\n", errorMode);
   }
 } 
  
@@ -180,3 +188,7 @@ void logicTree()
       break;
   }
 }
+
+
+
+/* fire signal when in position between 160 and 340. else off */

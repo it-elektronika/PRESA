@@ -31,11 +31,14 @@ extern int cycleCounter;
 extern int cycleCheck;
 extern int page_main_FirstLoad;
 extern int page_settings_FirstLoad;
+extern int page_error_SecondLoad;
 
 extern int left_button_selected;
 extern int right_button_selected;
 extern int pageNumber;
 
+extern int pageLoadCount;
+int blinkCounter;
 int selected[4];
 int noButtonSelected;
 extern int id;

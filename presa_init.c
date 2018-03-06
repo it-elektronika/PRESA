@@ -26,6 +26,8 @@ char currentPlus[50];
 char currentText[40];
 int setCurrent = 10000;
 
+char airText[20];
+char oilText[20];
 int margin;
 int currentMargin;
 int highThr;
