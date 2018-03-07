@@ -4,6 +4,9 @@ int page = 0;
 int sbarText = 4;
 int backgroundColor = 1;
 
+char fileBuff[10][50];
+char fileBuffRm[10][50];
+
 int sensors[11];
 int sensorsValue[10];
 int sensorsDust[11];
@@ -19,19 +22,21 @@ int labels[10];
 
 char encoderVal[50];
 char savedValue[50];
-char currentValue[50];
-char marginValue[50];
-char savedPlus[50];
-char currentPlus[50];
+
+char currentValue[10][50];
+char marginValue[10][30];
+char savedPlus[10][50];
+char currentPlus[10][50];
+
 char currentText[40];
 int setCurrent = 10000;
 
 char airText[20];
 char oilText[20];
 int margin;
-int currentMargin;
+int currentMargin[10];
 int highThr;
-int savedHighThr;
+int savedHighThr[10];
 int errorMode = 0;
 int encoder;
 

@@ -5,7 +5,7 @@ int main()
 {
   
   init();
-  
+  initVars(); 
   while(program == 1)
   {
     touchUpdate();

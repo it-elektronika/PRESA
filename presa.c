@@ -26,7 +26,7 @@ void readSensors()  /* handling struct for drawing grids */
   
   for(i = 0; i < 10; ++i)
   {
-    if(sensorsValue[i] > savedHighThr && (encoder >= screwdHigh || encoder <= screwdLow))
+    if(sensorsValue[i] > savedHighThr[i] && (encoder >= screwdHigh || encoder <= screwdLow))
     {
       sensors[i] = 1;
     }
@@ -46,35 +46,57 @@ void readSensors()  /* handling struct for drawing grids */
   }
 }
 
-void readParams(int *pageFirstLoad)
+void readSensParams(int *pageFirstLoad)
 {
   int i;
+  int j;
   
+  if(*pageFirstLoad)
+  { 
+    for(i = 0; i < 10; i++)
+    {
+      printf("fileBuff[%d]:%s\n", i, fileBuff[i]);
+      #ifdef RPI
+      fp_sens[i] = fopen(fileBuff[i], "r");
+      #endif
+      #ifdef LUKA
+      fp_sens[i] = fopen(fileBuff[i], "r");
+      #endif
+
+      for(j = 0; j < 3; ++j)
+      {
+        getline(&line, &len, fp_sens[i]);
+        
+  
+        if(j==0)
+        {
+          margin = atoi(line);
+        }
+        else if(j==1)
+        {
+          savedHighThr[j]=atoi(line);
+        }
+      }
+      currentMargin[j] = margin;
+    }
+  *pageFirstLoad = 0;
+  
+  }
+}
+
+void readCurrParams(int *pageFirstLoad)
+{
+  int i;
+
   #ifdef RPI
-  fp_sens = fopen("/home/pi/PRESA/data/param_sens.txt", "r");
   fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "r");
   #endif
   #ifdef LUKA
-  fp_sens = fopen("/home/luka/PRESA/data/param_sens.txt", "r");
   fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "r");
   #endif
+
   if(*pageFirstLoad) 
   {
-    for(i = 0; i < 3; ++i)
-    {
-      getline(&line, &len, fp_sens);
-  
-      if(i==0)
-      {
-        margin = atoi(line);
-      }
-      else if(i==1)
-      {
-        savedHighThr=atoi(line);
-      }
-    }
-    currentMargin = margin;
- 
     for(i = 0; i < 1; ++i)
     { 
       getline(&line, &len, fp_curr);
@@ -190,5 +212,26 @@ void logicTree()
 }
 
 
-
+void initVars()
+{
+  int i;
+  int count_lab = 1;
+  
+  for(i = 0; i < 10; ++i)
+  {
+     #ifdef RPI
+     sprintf(fileBuff[i], "/home/pi/PRESA/data/sensor_%d_param.txt\n", i);
+     sprintf(fileBuffRm[i],"rm %s", fileBuff[i]);
+     #endif
+    
+     #ifdef LUKA
+     sprintf(fileBuff[i], "/home/luka/PRESA/data/sensor_%d_param.txt\n", i);
+     sprintf(fileBuffRm[i],"rm %s", fileBuff[i]);
+     #endif
+   
+     sprintf(sensorLabels[i], "S%d", count_lab);
+     count_lab++;
+  }
+   
+}
 /* fire signal when in position between 160 and 340. else off */

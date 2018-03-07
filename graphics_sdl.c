@@ -227,7 +227,14 @@ void renderStatusBar()
       renderText("SMET NA SENZORJU", regularText, blackColor);
       break;
   } 
-  render(100, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  if(page !=3)
+  {
+    render(100, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  }
+  else
+  {
+    render(30, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  }
 }
 
 void renderInCycle()
@@ -241,7 +248,7 @@ void renderInCycle()
   sens_c = 0;
   y = 200;
   
-  readParams(&page_main_FirstLoad);
+  readSensParams(&page_main_FirstLoad);
   SDL_RenderDrawRect(renderer, &bar1);
   SDL_RenderDrawRect(renderer, &bar2);
   
@@ -257,11 +264,11 @@ void renderInCycle()
   sprintf(encoderVal, "ENCODER: %d", encoder);
   renderText(encoderVal, smallText,  blackColor);
   render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
-
-  sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
+/*
+  sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr[0]);
   renderText(savedPlus, smallText, blackColor);
   render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);
-    
+*/    
   for(i = 0; i < 5; i++)
   {
     if(sensors[sens_c] > 0 || sensors[sens_c+1] > 0)
@@ -304,31 +311,97 @@ void renderInCycle()
 
 void renderSettings()
 {
-  readParams(&page_settings_FirstLoad);
-  renderAdmin(1200, 0, 80, 80,1); 
- 
-  sprintf(currentValue, "TRENUTNA VREDNOST: %d", sensorsValue[0]);
-  sprintf(marginValue, "TOLERANCA: %d ", currentMargin);
-  sprintf(currentPlus, "TRENUTNA MAKSIMALNA DOVOLJENA VREDNOST: %d", sensorsValue[0] + currentMargin);
-  sprintf(savedPlus, "SHRANJENA MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
-   
-  renderText(currentValue, regularText, blackColor);
-  render(100, 100, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  int i;
+  int j;
+  int x1;
+  int x2;
+  int y1;
+  int y2;
   
-  renderText(marginValue, regularText, blackColor);
-  render(100, 200, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  int y;
+  int ya;
+  y = 165;
+  ya = 150;
+  x1 = 0;
+  y1 = 150;
+  
+  x2 = 1280;
+  y2 = 150;
 
-  renderText(currentPlus, regularText, blackColor);
-  render(100, 300, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  readSensParams(&page_settings_FirstLoad);
   
-  renderText(savedPlus, regularText, blackColor);
-  render(100, 400, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  renderAdmin(1200, 0, 80, 80,1); 
   
+  for(i = 0; i < 10; ++i)
+  {
+    sprintf(currentValue[i], "%d", sensorsValue[i]);
+    sprintf(marginValue[i], "%d", currentMargin[i]);
+    sprintf(currentPlus[i], "%d", sensorsValue[i] + currentMargin[i]);
+    sprintf(savedPlus[i], "%d",  savedHighThr[i]);
+
+    renderText(currentValue[i], smallText, blackColor);
+    render(170, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+    renderText(marginValue[i], smallText, blackColor);
+    render(450, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+    renderText(currentPlus[i], smallText, blackColor);
+    render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+    renderText(savedPlus[i], smallText, blackColor);
+    render(900, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    
+    renderText(sensorLabels[i], smallText,  blackColor);
+    render(30, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+ 
+
+    up_button(540, y, &currentMargin[i], 1000);
+    down_button(620, y, &currentMargin[i], 1000);
+    button_save(1150, ya, 130, 65, 2);
+
+
+
+    for(j = 0; j < 5; j++)
+    {
+      SDL_RenderDrawLine(renderer, x1, y1+j, x2, y2+j);
+    }
+    
+    y1 = y1 + 65;
+    y2 = y2 + 65;
+    ya = ya + 65;
+    y = y + 65;
+  }
+
+  /*
   up_button(400, 190, &currentMargin, 100);
   down_button(500, 190, &currentMargin, 100);
 
-  button_save(1000, 390, 190, 50, 0);
+  */
+ 
+    
 
+  SDL_RenderDrawLine(renderer, 160, 90, 160, 800);
+  SDL_RenderDrawLine(renderer, 440, 90, 440, 800);
+  SDL_RenderDrawLine(renderer, 690, 90, 690, 800);
+  SDL_RenderDrawLine(renderer, 890, 90, 890, 800);
+
+  renderText("SENZOR", smallText, blackColor);
+  render(30, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
+
+  renderText("TRENUTNA VRED.", smallText, blackColor);
+  render(170, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
+
+  renderText("TOLERANCA", smallText, blackColor);
+  render(450, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
+
+
+
+  renderText("MAKS.VRED.", smallText, blackColor);
+  render(700, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
+
+  renderText("SHRANJENA MAKS.VRED.", smallText, blackColor);
+  render(900, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
+  
 }
 
 void renderTurnSelect()
@@ -402,10 +475,10 @@ void renderErrorMode1()
   renderText(encoderVal, smallText,  blackColor);
   render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
-  sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
+  /*sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr[0]);
   renderText(savedPlus, smallText, blackColor);
   render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);   
-    
+  */   
   y = 180;
   count_num = 0;
   s_count = 1;
@@ -489,10 +562,10 @@ void renderErrorMode2()
   renderText(encoderVal, smallText,  blackColor);
   render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
-  sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr);
+  /*sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr[0]);
   renderText(savedPlus, smallText, blackColor);
   render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);   
-    
+  */  
   y = 180;
   count_num = 0;
   s_count = 1;
@@ -662,7 +735,7 @@ void up_button(int x,  int y, int *incrementee, int incrementor)
 
   render(x, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
-  if(touchLocation.x > x && touchLocation.x < x+100 && touchLocation.y > y && touchLocation.y < y + 100 && timestamp > oldtimestamp)
+  if(touchLocation.x > x && touchLocation.x < x+imageSurface->w && touchLocation.y > y && touchLocation.y < y + imageSurface->h && timestamp > oldtimestamp)
   {
     
     if(*incrementee <= 9000)
@@ -703,7 +776,7 @@ void down_button(int x, int y, int *decrementee, int decrementor)
   }	
   render(x, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
-  if(touchLocation.x > x && touchLocation.x < x+100 && touchLocation.y > y && touchLocation.y < y + 100 && timestamp > oldtimestamp)
+  if(touchLocation.x > x && touchLocation.x < x+imageSurface->w && touchLocation.y > y && touchLocation.y < y + imageSurface->h && timestamp > oldtimestamp)
   {
     if(*decrementee > 0)
     {
@@ -747,8 +820,9 @@ void left_button(int x,  int y)
   
   if(touchLocation.x > x && touchLocation.x < x+imageSurface->w && touchLocation.y > y && touchLocation.y < y + imageSurface->h && timestamp > oldtimestamp)
   {
-    if(left_button_selected == 0 && right_button_selected == 0)
+    if(left_button_selected == 0 /*&& right_button_selected == 0*/)
     {
+      right_button_selected = 0;
       left_button_selected = 1;
     }
     else
@@ -807,9 +881,11 @@ void right_button(int x,  int y)
   
   if(touchLocation.x > x && touchLocation.x < x+imageSurface->w && touchLocation.y > y && touchLocation.y < y + imageSurface->h && timestamp > oldtimestamp)
   {
-    if(right_button_selected == 0 && left_button_selected == 0)
+    if(right_button_selected == 0/* && left_button_selected == 0*/)
     {
+      left_button_selected = 0;
       right_button_selected = 1;
+      
     }
     else
     {
@@ -837,22 +913,29 @@ void button_save(int x, int y, int w, int h, int sel)
   SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
   SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
   SDL_RenderDrawLine(renderer, x, (y+h), x, y);
-  renderText("SHRANI", regularText,  blackColor);
+  renderText("SHRANI", smallText,  blackColor);
   render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
   if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 0)
   {
-    savedHighThr = sensorsValue[0] + currentMargin;
+    savedHighThr[0] = sensorsValue[0] + currentMargin[0];
     #ifdef RPI
-    system("rm /home/pi/PRESA/data/param_sens.txt");	  
-    fp_sens = fopen("/home/pi/PRESA/data/param_sens.txt", "w");
+    sprintf(fileBuff[sel], "/home/pi/PRESA/data/sensor_%d_param.txt", sel);
+    sprintf(fileBuffRm[sel],"rm %s", fileBuff[sel]);
+ 
+    system(fileBuffRm[sel]);	  
+    fp_sens[sel] = fopen(fileBuff[sel], "w");
     #endif
+    
     #ifdef LUKA
-    system("rm /home/luka/PRESA/data/param_sens.txt");	  
-    fp_sens = fopen("/home/luka/PRESA/data/param_sens.txt", "w");
+    sprintf(fileBuff[sel], "/home/luka/PRESA/data/sensor_%d_param.txt", sel);
+    sprintf(fileBuffRm[sel],"rm %s", fileBuff[sel]);
+  
+    system(fileBuffRm[sel]);	  
+    fp_sens[sel] = fopen(fileBuff[sel], "w");
     #endif
-    fprintf(fp_sens, "%d\n", currentMargin);    
-    fprintf(fp_sens, "%d\n", savedHighThr);
-    fclose(fp_sens);
+    fprintf(fp_sens[sel], "%d\n", currentMargin[0]);    
+    fprintf(fp_sens[sel], "%d\n", savedHighThr[0]);
+    fclose(fp_sens[sel]);
     
   }
   else if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 1)
@@ -918,8 +1001,12 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
           noButtonSelected = 1;
         }
       }
-      if(selected[id] == 0 && noButtonSelected == 1) 
+      if(selected[id] == 0 /*&& noButtonSelected == 1*/) 
       {
+        for(i = 0; i < 4; i++)
+        {
+          selected[i] = 0;
+        }
         selected[id] = 1;
       }
       else if(selected[id] == 1)
@@ -1028,6 +1115,7 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum)
     cycleCheck = cycleCounter;
     
     page = gotoNum;
+    sbarText = 5;
     if(page == 1)
     {
       page_main_FirstLoad = 1;

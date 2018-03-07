@@ -1,5 +1,9 @@
-extern FILE *fp_sens;
+extern FILE *fp_sens[10];
 extern FILE *fp_curr;
+
+extern char fileBuff[10][50];
+extern char fileBuffRm[10][50];
+
 extern char *line;
 extern size_t len;
 
@@ -22,10 +26,11 @@ extern int labels[10];
 
 extern char encoderVal[50];
 extern char savedValue[50];
-extern char currentValue[50];
-extern char marginValue[50];
-extern char savedPlus[50];
-extern char currentPlus[50];
+
+extern char currentValue[10][50];
+extern char marginValue[10][30];
+extern char savedPlus[10][50];
+extern char currentPlus[10][50];
 extern char currentText[40];
 extern int setCurrent;
 
@@ -34,9 +39,9 @@ extern char oilText[20];
 extern int errorMode;
 
 extern int margin;
-extern int currentMargin;
+extern int currentMargin[10];
 extern int highThr;
-extern int savedHighThr;
+extern int savedHighThr[10];
 
 extern float divisor;
 extern int substract;
@@ -50,9 +55,10 @@ extern int encoder;
 extern int program;
 
 extern void readSensors();
-extern void readParams(int *pageFirstLoad);
-
+extern void readSensParams(int *pageFirstLoad);
+extern void readCurrParams(int *pageFirstLoad);
 extern void checkError();
 extern void checkSelectP0();
 extern void checkSelectP1();
 extern void logicTree();
+extern void initVars();
