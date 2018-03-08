@@ -29,7 +29,7 @@ char savedPlus[10][50];
 char currentPlus[10][50];
 
 char currentText[40];
-int setCurrent = 10000;
+int setCurrent;
 
 char airText[30];
 char oilText[30];

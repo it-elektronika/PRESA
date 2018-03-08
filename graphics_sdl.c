@@ -357,7 +357,7 @@ void renderSettings()
 
     up_button(540, y, &currentMargin[i], 1000);
     down_button(620, y, &currentMargin[i], 1000);
-    button_save(1150, ya, 130, 65, 2);
+    button_save(1150, ya, 130, 65, i);
 
 
 
@@ -407,10 +407,11 @@ void renderSettings()
 void renderTurnSelect()
 {
   int i;
+  readCurrParams(&page_main_FirstLoad);
   sprintf(currentText, "NASTAVITEV NAPETOSTI: %d V", setCurrent/1000);
 
-  up_button(900, 690, &setCurrent, 1000);
-  down_button(1000, 690, &setCurrent, 1000);
+  up_button(1050, 700, &setCurrent, 1000);
+  down_button(1150, 700, &setCurrent, 1000);
 
   renderText(currentText, regularText, blackColor);
   render(300, 700, NULL, 0.0, NULL, SDL_FLIP_NONE);
@@ -456,6 +457,9 @@ void renderModeSelect()
   renderText(oilText, smallText, blackColor);
   render(800, 650, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
+  sprintf(encoderVal, "POZICIJA: %d%c", encoder, 0x00B0);
+  renderText(encoderVal, smallText,  blackColor);
+  render(800, 700, NULL, 0.0, NULL, SDL_FLIP_NONE);
 }
 
 void renderErrorMode1()
@@ -917,9 +921,9 @@ void button_save(int x, int y, int w, int h, int sel)
   SDL_RenderDrawLine(renderer, x, (y+h), x, y);
   renderText("SHRANI", smallText,  blackColor);
   render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
-  if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 0)
+  if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
   {
-    savedHighThr[0] = sensorsValue[0] + currentMargin[0];
+    savedHighThr[sel] = sensorsValue[sel] + currentMargin[sel];
     #ifdef RPI
     sprintf(fileBuff[sel], "/home/pi/PRESA/data/sensor_%d_param.txt", sel);
     sprintf(fileBuffRm[sel],"rm %s", fileBuff[sel]);
@@ -935,11 +939,12 @@ void button_save(int x, int y, int w, int h, int sel)
     system(fileBuffRm[sel]);	  
     fp_sens[sel] = fopen(fileBuff[sel], "w");
     #endif
-    fprintf(fp_sens[sel], "%d\n", currentMargin[0]);    
-    fprintf(fp_sens[sel], "%d\n", savedHighThr[0]);
+    fprintf(fp_sens[sel], "%d\n", currentMargin[sel]);    
+    fprintf(fp_sens[sel], "%d\n", savedHighThr[sel]);
     fclose(fp_sens[sel]);
     
   }
+  /*
   else if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 1)
   {
     #ifdef RPI
@@ -953,7 +958,7 @@ void button_save(int x, int y, int w, int h, int sel)
     fprintf(fp_curr, "%d\n", setCurrent);
     fclose(fp_curr);
     
-  }
+  }*/
 }
 
 void button(int x, int y, int w, int h, char *text, int id)  /* save row/column data button */
@@ -1020,6 +1025,7 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
   }
   else
   {
+    page_settings_FirstLoad = 1;
     for(i = 0; i < 5; i++)
     {
       SDL_RenderDrawLine(renderer, x, y+i, (x+w), y+i);

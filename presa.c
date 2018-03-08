@@ -50,7 +50,6 @@ void readSensParams(int *pageFirstLoad)
 {
   int i;
   int j;
-  
   if(*pageFirstLoad)
   { 
     for(i = 0; i < 10; i++)
@@ -58,15 +57,18 @@ void readSensParams(int *pageFirstLoad)
       printf("fileBuff[%d]:%s\n", i, fileBuff[i]);
       #ifdef RPI
       fp_sens[i] = fopen(fileBuff[i], "r");
+      if(fp_sens[i] == NULL)
+      {
+        printf("File: %d - FILE NOT OPENED\n", i);
+      }
       #endif
       #ifdef LUKA
       fp_sens[i] = fopen(fileBuff[i], "r");
       #endif
 
-      for(j = 0; j < 3; ++j)
+      for(j = 0; j < 2; ++j)
       {
         getline(&line, &len, fp_sens[i]);
-        
   
         if(j==0)
         {
@@ -74,13 +76,12 @@ void readSensParams(int *pageFirstLoad)
         }
         else if(j==1)
         {
-          savedHighThr[j]=atoi(line);
+          savedHighThr[i]=atoi(line);
         }
       }
-      currentMargin[j] = margin;
+      currentMargin[i] = margin;
     }
-  *pageFirstLoad = 0;
-  
+    *pageFirstLoad = 0;
   }
 }
 
@@ -103,7 +104,7 @@ void readCurrParams(int *pageFirstLoad)
       if(i==0)
       {
         setCurrent=atoi(line);
-        writeVariableValue("OutputValue_1_i04", setCurrent); 
+        
       }
     }
     *pageFirstLoad = 0;    
@@ -152,6 +153,18 @@ void checkSelectP0()
     if(left_button_selected || right_button_selected)
     {
       page = 1;
+     
+      #ifdef RPI
+      system("rm /home/pi/PRESA/data/param_curr.txt");	  
+      fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "w");
+      #endif
+      #ifdef LUKA
+      system("rm /home/luka/PRESA/data/param_curr.txt");	  
+      fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "w");
+      #endif
+      fprintf(fp_curr, "%d\n", setCurrent);
+      fclose(fp_curr);
+      writeVariableValue("OutputValue_1_i04", setCurrent); 
     } 
   }
 }
@@ -220,12 +233,12 @@ void initVars()
   for(i = 0; i < 10; ++i)
   {
      #ifdef RPI
-     sprintf(fileBuff[i], "/home/pi/PRESA/data/sensor_%d_param.txt\n", i);
+     sprintf(fileBuff[i], "/home/pi/PRESA/data/sensor_%d_param.txt", i);
      sprintf(fileBuffRm[i],"rm %s", fileBuff[i]);
      #endif
     
      #ifdef LUKA
-     sprintf(fileBuff[i], "/home/luka/PRESA/data/sensor_%d_param.txt\n", i);
+     sprintf(fileBuff[i], "/home/luka/PRESA/data/sensor_%d_param.txt", i);
      sprintf(fileBuffRm[i],"rm %s", fileBuff[i]);
      #endif
    
