@@ -34,8 +34,8 @@ extern char currentPlus[10][50];
 extern char currentText[40];
 extern int setCurrent;
 
-extern char airText[20];
-extern char oilText[20];
+extern char airText[30];
+extern char oilText[30];
 extern int errorMode;
 
 extern int margin;

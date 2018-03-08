@@ -4,7 +4,7 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 800
-#define RPI 1
+#define LUKA 1
 
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;

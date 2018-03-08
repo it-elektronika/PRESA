@@ -682,7 +682,7 @@ void touchUpdate()   /* handling touch events */
 {
   while(SDL_PollEvent(&event) != 0 )
   {
-    
+    #ifdef RPI
     if(event.type == SDL_FINGERDOWN)  
     {
       
@@ -690,13 +690,15 @@ void touchUpdate()   /* handling touch events */
       touchLocation.x = event.tfinger.x;
       touchLocation.y = event.tfinger.y;
     }
-    /*
+    #endif
+    #ifdef LUKA
     if(event.type == SDL_MOUSEBUTTONDOWN)
     {
       timestamp = event.button.timestamp;
       touchLocation.x = event.button.x;
       touchLocation.y = event.button.y;
-    }*/
+    }
+    #endif
   }
   
   
