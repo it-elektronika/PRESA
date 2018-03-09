@@ -3,27 +3,29 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <time.h>
 #include "presa.h"
 #include "kunbus.h"
 #include "graphics_sdl.h"
+
 
 void readSensors()  /* handling struct for drawing grids */
 {  
   int i;
   encoder = round((readVariableValue("InputValue_1_i04")-substract)/divisor);
-
+  
   /* IF encoder in right position read values */
   sensorsValue[0] = readVariableValue("InputValue_1");
   sensorsValue[1] = readVariableValue("InputValue_2");
   sensorsValue[2] = readVariableValue("InputValue_3");
   sensorsValue[3] = readVariableValue("InputValue_4");
-  sensorsValue[4] = readVariableValue("InputValue_5");
-  sensorsValue[5] = readVariableValue("InputValue_6");
-  sensorsValue[6] = readVariableValue("InputValue_7");
-  sensorsValue[7] = readVariableValue("InputValue_8");
-  sensorsValue[8] = readVariableValue("InputValue_9");
-  sensorsValue[9] = readVariableValue("InputValue_10");
-  
+  sensorsValue[4] = readVariableValue("InputValue_2_i04");
+  sensorsValue[5] = readVariableValue("InputValue_3_i04");
+  sensorsValue[6] = readVariableValue("InputValue_4_i04");
+  sensorsValue[7] = readVariableValue("InputValue_2_i05");
+  sensorsValue[8] = readVariableValue("InputValue_3_i05");
+  sensorsValue[9] = readVariableValue("InputValue_4_i05");
+
   for(i = 0; i < 10; ++i)
   {
     if(sensorsValue[i] > savedHighThr[i] && (encoder >= screwdHigh || encoder <= screwdLow))
@@ -153,7 +155,7 @@ void checkSelectP0()
     if(left_button_selected || right_button_selected)
     {
       page = 1;
-     
+      sbarText = 5;
       #ifdef RPI
       system("rm /home/pi/PRESA/data/param_curr.txt");	  
       fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "w");
@@ -164,7 +166,7 @@ void checkSelectP0()
       #endif
       fprintf(fp_curr, "%d\n", setCurrent);
       fclose(fp_curr);
-      writeVariableValue("OutputValue_1_i04", setCurrent); 
+      writeVariableValue("OutputValue_1_i05", setCurrent); 
     } 
   }
 }
@@ -202,6 +204,18 @@ void checkStopCycle()
 {
   if(readVariableValue("I_3"))
   {
+    struct timespec start, stop;
+    double accum;
+    
+    clock_gettime(CLOCK_REALTIME, &start);    
+    while(accum < 10)
+    {
+      clock_gettime(CLOCK_REALTIME, &stop);
+
+     accum = ( stop.tv_sec - start.tv_sec )
+     + ( stop.tv_nsec - start.tv_nsec )
+     / BILLION;
+    }
     page = 1;
   }
 }
@@ -247,4 +261,31 @@ void initVars()
   }
    
 }
+
+void timer(int measure)
+{
+  struct timespec start, stop;
+  double accum;
+    
+  clock_gettime(CLOCK_REALTIME, &start);    
+  while(accum < measure)
+  {
+    clock_gettime(CLOCK_REALTIME, &stop);
+
+    accum = ( stop.tv_sec - start.tv_sec )
+     + ( stop.tv_nsec - start.tv_nsec )
+     / BILLION;
+  }
+  /*
+  if(accum >= measure)
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  } 
+  */
+}
+
 /* fire signal when in position between 160 and 340. else off */

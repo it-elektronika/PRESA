@@ -1,3 +1,6 @@
+#define BILLION  1000000000L;
+
+
 extern FILE *fp_sens[10];
 extern FILE *fp_curr;
 
@@ -53,7 +56,7 @@ extern int dustLow;
 extern int encoder;
 
 extern int program;
-
+extern void timer(int measure);
 extern void readSensors();
 extern void readSensParams(int *pageFirstLoad);
 extern void readCurrParams(int *pageFirstLoad);

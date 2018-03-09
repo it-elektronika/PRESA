@@ -8,7 +8,6 @@
 
 int init()    /* things needed to start sdl2 properly */
 {
-
   int flags;
   int innited;
  
@@ -427,12 +426,12 @@ void renderTurnSelect()
 
 void renderModeSelect()
 {
-  button(100, 150, 550, 150, "POMIK V IZHODISCE", 0);
-  button(100, 300, 550, 150, "ROCNI NACIN", 1);
-  button(100, 450, 550, 150, "POL-AVTOMATSKI NACIN", 2);
-  button(100, 600, 550, 150, "AVTOMATSKI NACIN", 3);
+  button(100, 150, 570, 155, "POMIK V IZHODISCE", 0);
+  button(100, 300, 570, 155, "ROCNI NACIN", 1);
+  button(100, 450, 570, 155, "POL-AVTOMATSKI NACIN", 2);
+  button(100, 600, 570, 155, "AVTOMATSKI NACIN", 3);
   
-  button(800, 150, 400, 150, "SENZORJI", 5);
+  button(800, 150, 400, 155, "SENZORJI", 5);
   
   if(readVariableValue("I_4"))
   {
@@ -797,10 +796,10 @@ void left_button(int x,  int y)
   SDL_Surface *imageSurface;
   freeTexture();
   #ifdef RPI
-  imageSurface = IMG_Load("/home/pi/PRESA/images/left_200_black.png");
+  imageSurface = IMG_Load("/home/pi/PRESA/images/left_200.png");
   #endif
   #ifdef LUKA
-  imageSurface = IMG_Load("/home/luka/PRESA/images/left_200_black.png");
+  imageSurface = IMG_Load("/home/luka/PRESA/images/left_200.png");
   #endif
   
   if(imageSurface == NULL)
@@ -858,10 +857,10 @@ void right_button(int x,  int y)
   SDL_Surface *imageSurface;
   freeTexture();
   #ifdef RPI
-  imageSurface = IMG_Load("/home/pi/PRESA/images/right_200_black.png");
+  imageSurface = IMG_Load("/home/pi/PRESA/images/right_200.png");
   #endif
   #ifdef LUKA
-  imageSurface = IMG_Load("/home/luka/PRESA/images/right_200_black.png");
+  imageSurface = IMG_Load("/home/luka/PRESA/images/right_200.png");
   #endif
   
   if(imageSurface == NULL)
@@ -1116,7 +1115,7 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum)
     SDL_RenderDrawLine(renderer, x+i, (y+h), x+i, y);
   }
   renderText("...", regularText, blackColor);
-  render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
+  render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2+10)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
 
   if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && cycleCounter != cycleCheck)
   {

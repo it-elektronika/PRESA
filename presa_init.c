@@ -40,8 +40,8 @@ int savedHighThr[10];
 int errorMode = 0;
 int encoder;
 
-float divisor = 44.441666667;
-int substract = 3983;
+float divisor = 44.455555556;   /* (HIGHEST VALUE - LOWEST VALUE)/360*/
+int substract = 4026;           /* LOWEST VALUE */
 
 int screwdHigh = 300;
 int screwdLow = 110;
