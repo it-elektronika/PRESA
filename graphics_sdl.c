@@ -254,8 +254,8 @@ void renderInCycle()
   sens_c = 0;
   y = 200;
   
-  readSensParams(&page_main_FirstLoad);
-  readDustParams(&page_main_FirstLoad);
+  readSensParams(&page_settings_screwdriver_FirstLoad);
+  readDustParams(&page_settings_dust_FirstLoad);
 
   SDL_RenderDrawRect(renderer, &bar1);
   SDL_RenderDrawRect(renderer, &bar2);

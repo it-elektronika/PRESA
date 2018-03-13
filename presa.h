@@ -86,3 +86,4 @@ extern void checkSelectP0();
 extern void checkSelectP1();
 extern void logicTree();
 extern void initVars();
+extern int encodeRange(int a, int b);

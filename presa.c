@@ -130,7 +130,6 @@ void readDustParams(int *pageFirstLoad)
 void readCurrParams(int *pageFirstLoad)
 {
   int i;
-
   #ifdef RPI
   fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "r");
   #endif
@@ -154,37 +153,33 @@ void readCurrParams(int *pageFirstLoad)
 
 void checkError()
 {
-  if(page == 2)
+  int i;
+  for(i = 0; i < 4; i++)
   {
-    int i;
-
-    for(i = 0; i < 4; i++)
+    if(sensors[i] == 1)
     {
-      if(sensors[i] == 1)
-      {
-        errorMode = 1;
-        page = 4;
-        sbarText = 7;
-        break;
-      }
-      else
-      {
-        errorMode = 0;
-      }
-      if(sensorsDust[i]== 1)
-      {
-        errorMode = 2;
-        page = 4;
-        sbarText = 8;
-        break;
-      }
-      else
-      {
-        errorMode = 0;
-      }
+      errorMode = 1;
+      page = 4;
+      sbarText = 7;
+      break;
     }
-    printf("ERROR MODE: %d\n", errorMode);
+    else
+    {
+      errorMode = 0;
+    }
+    if(sensorsDust[i]== 1)
+    {
+      errorMode = 2;
+      page = 4;
+      sbarText = 8;
+      break;
+    }
+    else
+    {
+      errorMode = 0;
+    }
   }
+  printf("ERROR MODE: %d\n", errorMode); 
 } 
  
 void checkSelectP0()
@@ -261,7 +256,12 @@ void logicTree()
       break; 
     
     case 2:
+      /*if(readVariableValue("I_6") == 1)
+      {*/
+      checkError();
+      /*}*/
       checkStopCycle();
+      printf("IN RANGE:%d\n", encodeRange(100, 200));
       break;
   }
 }
@@ -327,4 +327,15 @@ void timer(int measure)
   */
 }
 
+int encodeRange (int a, int b)
+{
+  if(encoder >= a && encoder <= b)
+  {
+    return 1; 
+  }
+  else
+  {
+    return 0;
+  }
+}
 /* fire signal when in position between 160 and 340. else off */

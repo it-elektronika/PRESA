@@ -7,15 +7,12 @@ int main()
   initVars(); 
   while(program == 1)
   {
-
     touchUpdate();
     if(page!=4)
     {
       readSensors();
     }
-    checkError();
     logicTree();
-    
      
     renderBackground();
     renderStatusBar(); 
