@@ -2,10 +2,16 @@
 
 
 extern FILE *fp_sens[10];
+extern FILE *fp_dust[10];
+
 extern FILE *fp_curr;
 
 extern char fileBuff[10][50];
 extern char fileBuffRm[10][50];
+
+
+extern char fileBuffDust[10][50];
+extern char fileBuffRmDust[10][50];
 
 extern char *line;
 extern size_t len;
@@ -34,6 +40,14 @@ extern char currentValue[10][50];
 extern char marginValue[10][30];
 extern char savedPlus[10][50];
 extern char currentPlus[10][50];
+
+extern char currentDustValue[10][50];
+extern char marginDustValue[10][30];
+extern char savedMinus[10][50];
+extern char currentMinus[10][50];
+
+
+
 extern char currentText[40];
 extern int setCurrent;
 
@@ -42,10 +56,15 @@ extern char oilText[30];
 extern int errorMode;
 
 extern int margin;
-extern int currentMargin[10];
-extern int highThr;
-extern int savedHighThr[10];
+extern int dustMargin;
 
+extern int currentMargin[10];
+extern int currentDustMargin[10];
+
+extern int highThr;
+extern int lowThr;
+extern int savedHighThr[10];
+extern int savedLowThr[10];
 extern float divisor;
 extern int substract;
 
@@ -59,6 +78,8 @@ extern int program;
 extern void timer(int measure);
 extern void readSensors();
 extern void readSensParams(int *pageFirstLoad);
+extern void readDustParams(int *pageFirstLoad);
+
 extern void readCurrParams(int *pageFirstLoad);
 extern void checkError();
 extern void checkSelectP0();

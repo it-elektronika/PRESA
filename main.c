@@ -3,8 +3,6 @@
 #include "presa.h"
 int main()
 {
-  timer(10);
-      
   init();
   initVars(); 
   while(program == 1)

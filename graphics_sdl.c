@@ -168,12 +168,10 @@ void renderStatusBar()
   x1_2 = 1280;
   y1_2 = 80;
 
-
   x2_1 = 0;
   y2_1 = 0;
   x2_2 = 1280;
   y2_2 = 0;
- 
 
   x3_1 = 0;
   y3_1 = 0;
@@ -225,14 +223,23 @@ void renderStatusBar()
     case 8:
       renderText("SMET NA SENZORJU", regularText, blackColor);
       break;
+
+    case 9:
+      renderText("SENZORJI - IZVIJAC", regularText, blackColor);
+      break;
+
+    case 10:
+      renderText("SENZORJI - SMET", regularText, blackColor);
+      
   } 
-  if(page !=3)
+  
+  if(page == 5 || page == 6) 
   {
-    render(100, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    render(30, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
   else
   {
-    render(30, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    render(100, 10, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
 }
 
@@ -248,6 +255,8 @@ void renderInCycle()
   y = 200;
   
   readSensParams(&page_main_FirstLoad);
+  readDustParams(&page_main_FirstLoad);
+
   SDL_RenderDrawRect(renderer, &bar1);
   SDL_RenderDrawRect(renderer, &bar2);
   
@@ -259,6 +268,8 @@ void renderInCycle()
     holes[i].h = 10;
     y = y + 100;
   }
+  
+  renderHoleLabels(); 
   
   sprintf(encoderVal, "ENCODER: %d", encoder);
   renderText(encoderVal, smallText,  blackColor);
@@ -307,8 +318,14 @@ void renderInCycle()
     s_count = s_count + 2;
   }
 } 
-
 void renderSettings()
+{
+  renderAdmin(1200, 0, 80, 80,1);
+  button(100, 150, 570, 155, "SENZORJI - IZVIJAC", 5);
+  button(100, 300, 570, 155, "SENZORJI - SMET", 6);
+}
+
+void renderSettingsScrewdriver()
 {
   int i;
   int j;
@@ -327,9 +344,9 @@ void renderSettings()
   x2 = 1280;
   y2 = 150;
 
-  readSensParams(&page_settings_FirstLoad);
+  readSensParams(&page_settings_screwdriver_FirstLoad);
   
-  renderAdmin(1200, 0, 80, 80,1); 
+  renderAdmin(1200, 0, 80, 80,3); 
   
   for(i = 0; i < 10; ++i)
   {
@@ -358,8 +375,6 @@ void renderSettings()
     down_button(620, y, &currentMargin[i], 1000);
     button_save(1150, ya, 130, 65, i);
 
-
-
     for(j = 0; j < 5; j++)
     {
       SDL_RenderDrawLine(renderer, x1, y1+j, x2, y2+j);
@@ -370,14 +385,6 @@ void renderSettings()
     ya = ya + 65;
     y = y + 65;
   }
-
-  /*
-  up_button(400, 190, &currentMargin, 100);
-  down_button(500, 190, &currentMargin, 100);
-
-  */
- 
-    
 
   SDL_RenderDrawLine(renderer, 160, 90, 160, 800);
   SDL_RenderDrawLine(renderer, 440, 90, 440, 800);
@@ -393,14 +400,94 @@ void renderSettings()
   renderText("TOLERANCA", smallText, blackColor);
   render(450, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
 
+  renderText("MAKS.VRED.", smallText, blackColor);
+  render(700, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
 
+  renderText("SHRANJENA MAKS.VRED.", smallText, blackColor);
+  render(900, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
+}
+ 
+
+void renderSettingsDust()
+{
+  int i;
+  int j;
+  int x1;
+  int x2;
+  int y1;
+  int y2;
+  
+  int y;
+  int ya;
+  y = 165;
+  ya = 150;
+  x1 = 0;
+  y1 = 150;
+  
+  x2 = 1280;
+  y2 = 150;
+
+  readDustParams(&page_settings_dust_FirstLoad);
+  
+  renderAdmin(1200, 0, 80, 80,3); 
+  
+  for(i = 0; i < 10; ++i)
+  {
+    sprintf(currentDustValue[i], "%d", sensorsValue[i]);
+    sprintf(marginDustValue[i], "%d", currentDustMargin[i]);
+    sprintf(currentMinus[i], "%d", sensorsValue[i] - currentDustMargin[i]);
+    sprintf(savedMinus[i], "%d",  savedLowThr[i]);
+
+    renderText(currentDustValue[i], smallText, blackColor);
+    render(170, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+    renderText(marginDustValue[i], smallText, blackColor);
+    render(450, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+    renderText(currentMinus[i], smallText, blackColor);
+    render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+    renderText(savedMinus[i], smallText, blackColor);
+    render(900, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    
+    renderText(sensorLabels[i], smallText,  blackColor);
+    render(30, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+    up_button(540, y, &currentDustMargin[i], 1000);
+    down_button(620, y, &currentDustMargin[i], 1000);
+    button_save(1150, ya, 130, 65, i);
+
+    for(j = 0; j < 5; j++)
+    {
+      SDL_RenderDrawLine(renderer, x1, y1+j, x2, y2+j);
+    }
+    
+    y1 = y1 + 65;
+    y2 = y2 + 65;
+    ya = ya + 65;
+    y = y + 65;
+  }
+
+  SDL_RenderDrawLine(renderer, 160, 90, 160, 800);
+  SDL_RenderDrawLine(renderer, 440, 90, 440, 800);
+  SDL_RenderDrawLine(renderer, 690, 90, 690, 800);
+  SDL_RenderDrawLine(renderer, 890, 90, 890, 800);
+
+  renderText("SENZOR", smallText, blackColor);
+  render(30, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
+
+  renderText("TRENUTNA VRED.", smallText, blackColor);
+  render(170, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
+
+  renderText("TOLERANCA", smallText, blackColor);
+  render(450, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
 
   renderText("MAKS.VRED.", smallText, blackColor);
   render(700, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
 
   renderText("SHRANJENA MAKS.VRED.", smallText, blackColor);
   render(900, 100, NULL, 0.0, NULL,  SDL_FLIP_NONE);
-  
+ 
 }
 
 void renderTurnSelect()
@@ -431,7 +518,7 @@ void renderModeSelect()
   button(100, 450, 570, 155, "POL-AVTOMATSKI NACIN", 2);
   button(100, 600, 570, 155, "AVTOMATSKI NACIN", 3);
   
-  button(800, 150, 400, 155, "SENZORJI", 5);
+  button(800, 150, 400, 155, "NASTAVITVE", 4);
   
   if(readVariableValue("I_4"))
   {
@@ -482,6 +569,9 @@ void renderErrorMode1()
   renderText(savedPlus, smallText, blackColor);
   render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);   
   */   
+
+  renderHoleLabels();   
+
   y = 180;
   count_num = 0;
   s_count = 1;
@@ -568,7 +658,10 @@ void renderErrorMode2()
   /*sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr[0]);
   renderText(savedPlus, smallText, blackColor);
   render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);   
-  */  
+  */
+
+  renderHoleLabels(); 
+    
   y = 180;
   count_num = 0;
   s_count = 1;
@@ -675,6 +768,14 @@ void renderContent()
     case 4:
       backgroundColor = 2;
       renderError();
+      break;
+    case 5:
+      renderSettingsScrewdriver();
+      backgroundColor = 1;
+      break;
+    case 6:
+      renderSettingsDust();
+      backgroundColor = 1;
       break;
   }
   oldtimestamp=timestamp;
@@ -922,26 +1023,50 @@ void button_save(int x, int y, int w, int h, int sel)
   render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
   if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
   {
-    savedHighThr[sel] = sensorsValue[sel] + currentMargin[sel];
-    #ifdef RPI
-    sprintf(fileBuff[sel], "/home/pi/PRESA/data/sensor_%d_param.txt", sel);
-    sprintf(fileBuffRm[sel],"rm %s", fileBuff[sel]);
+    if(page == 5)
+    {
+      savedHighThr[sel] = sensorsValue[sel] + currentMargin[sel];
+      #ifdef RPI
+      sprintf(fileBuff[sel], "/home/pi/PRESA/data/sensor_%d_param.txt", sel);
+      sprintf(fileBuffRm[sel],"rm %s", fileBuff[sel]);
  
-    system(fileBuffRm[sel]);	  
-    fp_sens[sel] = fopen(fileBuff[sel], "w");
-    #endif
+      system(fileBuffRm[sel]);	  
+      fp_sens[sel] = fopen(fileBuff[sel], "w");
+      #endif
     
-    #ifdef LUKA
-    sprintf(fileBuff[sel], "/home/luka/PRESA/data/sensor_%d_param.txt", sel);
-    sprintf(fileBuffRm[sel],"rm %s", fileBuff[sel]);
+      #ifdef LUKA
+      sprintf(fileBuff[sel], "/home/luka/PRESA/data/sensor_%d_param.txt", sel);
+      sprintf(fileBuffRm[sel],"rm %s", fileBuff[sel]);
   
-    system(fileBuffRm[sel]);	  
-    fp_sens[sel] = fopen(fileBuff[sel], "w");
-    #endif
-    fprintf(fp_sens[sel], "%d\n", currentMargin[sel]);    
-    fprintf(fp_sens[sel], "%d\n", savedHighThr[sel]);
-    fclose(fp_sens[sel]);
+      system(fileBuffRm[sel]);	  
+      fp_sens[sel] = fopen(fileBuff[sel], "w");
+      #endif
+      fprintf(fp_sens[sel], "%d\n", currentMargin[sel]);    
+      fprintf(fp_sens[sel], "%d\n", savedHighThr[sel]);
+      fclose(fp_sens[sel]);
+    }
+    if(page == 6)
+    {
+      savedLowThr[sel] = sensorsValue[sel] - currentDustMargin[sel];
+      #ifdef RPI
+      sprintf(fileBuffDust[sel], "/home/pi/PRESA/data/dust_%d_param.txt", sel);
+      sprintf(fileBuffRmDust[sel],"rm %s", fileBuffDust[sel]);
+ 
+      system(fileBuffRmDust[sel]);	  
+      fp_dust[sel] = fopen(fileBuffDust[sel], "w");
+      #endif
     
+      #ifdef LUKA
+      sprintf(fileBuffDust[sel], "/home/luka/PRESA/data/dust_%d_param.txt", sel);
+      sprintf(fileBuffRmDust[sel],"rm %s", fileBuffDust[sel]);
+  
+      system(fileBuffRmDust[sel]);	  
+      fp_dust[sel] = fopen(fileBuffDust[sel], "w");
+      #endif
+      fprintf(fp_dust[sel], "%d\n", currentDustMargin[sel]);    
+      fprintf(fp_dust[sel], "%d\n", savedLowThr[sel]);
+      fclose(fp_dust[sel]);
+    }
   }
   /*
   else if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 1)
@@ -966,7 +1091,7 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
   
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 
-  if(id != 5)
+  if(id == 0 || id == 1 || id == 2 || id == 3)
   {
 
     if(selected[id] == 0)
@@ -1022,9 +1147,8 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
       }
     }
   }
-  else
+  else if(id == 4)
   {
-    page_settings_FirstLoad = 1;
     for(i = 0; i < 5; i++)
     {
       SDL_RenderDrawLine(renderer, x, y+i, (x+w), y+i);
@@ -1042,8 +1166,50 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
       page = 3;
       sbarText = 6;
     }
+  }
 
-  } 
+  else if(id == 5)
+  {
+    for(i = 0; i < 5; i++)
+    {
+      SDL_RenderDrawLine(renderer, x, y+i, (x+w), y+i);
+      SDL_RenderDrawLine(renderer, (x+w+i), y, (x+w+i), (y+h)); 
+      SDL_RenderDrawLine(renderer, (x+w), (y+h-i), x, (y+h-i));
+      SDL_RenderDrawLine(renderer, x+i, (y+h), x+i, y);      
+    }
+
+    renderText(text, regularText, blackColor);
+    render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
+  
+    if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
+    {
+      /*page_settings_screwdriver_FirstLoad = 1;*/
+      page = 5;
+      sbarText = 9;
+    }
+  }
+
+  else if(id == 6)
+  {
+    
+    for(i = 0; i < 5; i++)
+    {
+      SDL_RenderDrawLine(renderer, x, y+i, (x+w), y+i);
+      SDL_RenderDrawLine(renderer, (x+w+i), y, (x+w+i), (y+h)); 
+      SDL_RenderDrawLine(renderer, (x+w), (y+h-i), x, (y+h-i));
+      SDL_RenderDrawLine(renderer, x+i, (y+h), x+i, y);      
+    }
+    
+    renderText(text, regularText, blackColor);
+    render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
+  
+    if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
+    {
+      /*page_settings_dust_FirstLoad = 1;*/
+      page = 6;
+      sbarText = 10;
+    }
+  }
 }
 
 /*
@@ -1122,16 +1288,48 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum)
     cycleCheck = cycleCounter;
     
     page = gotoNum;
-    sbarText = 5;
     if(page == 1)
     {
       page_main_FirstLoad = 1;
+      sbarText = 5;
+
     }
-    else if(page == 5)
+    else if(page == 3)
     {
-      page_settings_FirstLoad = 1;
-    }
+      sbarText = 6;
+      page_settings_screwdriver_FirstLoad = 1;
+      page_settings_dust_FirstLoad = 1;
+    }   
     /* memset(&passText[0], 0, 5); enable if using keypad*/ 
+  }
+}
+
+void renderHoleLabels()
+{
+  int i;
+  int y;
+  int count_num;
+
+  
+  y = 160;
+  count_num = 0;
+  
+  for(i = 0; i < 5; i++)
+  {
+    renderText(sensorLabels[count_num], smallText,  blackColor);
+    render(60, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    y = y + 100;
+    count_num = count_num + 2;
+  }
+  y = 160;
+  count_num = 1;
+  
+  for(i = 0; i < 5; i++)
+  {
+    renderText(sensorLabels[count_num], smallText,  blackColor);
+    render(315, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    y = y + 100;
+    count_num = count_num + 2;
   }
 }
 

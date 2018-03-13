@@ -15,6 +15,7 @@ void readSensors()  /* handling struct for drawing grids */
   encoder = round((readVariableValue("InputValue_1_i04")-substract)/divisor);
   
   /* IF encoder in right position read values */
+  
   sensorsValue[0] = readVariableValue("InputValue_1");
   sensorsValue[1] = readVariableValue("InputValue_2");
   sensorsValue[2] = readVariableValue("InputValue_3");
@@ -25,7 +26,7 @@ void readSensors()  /* handling struct for drawing grids */
   sensorsValue[7] = readVariableValue("InputValue_2_i05");
   sensorsValue[8] = readVariableValue("InputValue_3_i05");
   sensorsValue[9] = readVariableValue("InputValue_4_i05");
-
+ 
   for(i = 0; i < 10; ++i)
   {
     if(sensorsValue[i] > savedHighThr[i] && (encoder >= screwdHigh || encoder <= screwdLow))
@@ -37,7 +38,7 @@ void readSensors()  /* handling struct for drawing grids */
       sensors[i] = 0;
     }
 
-    if(sensorsValue[i] < dustThr && (encoder <= dustHigh && encoder >= dustLow))
+    if(sensorsValue[i] < savedLowThr[i] && (encoder <= dustHigh && encoder >= dustLow))
     {
       sensorsDust[i] = 1;
     }
@@ -87,6 +88,45 @@ void readSensParams(int *pageFirstLoad)
   }
 }
 
+void readDustParams(int *pageFirstLoad)
+{
+  int i;
+  int j;
+  if(*pageFirstLoad)
+  { 
+    for(i = 0; i < 10; i++)
+    {
+      printf("fileBuffDust[%d]:%s\n", i, fileBuffDust[i]);
+      #ifdef RPI
+      fp_dust[i] = fopen(fileBuffDust[i], "r");
+      if(fp_dust[i] == NULL)
+      {
+        printf("File: %d - FILE NOT OPENED\n", i);
+      }
+      #endif
+      #ifdef LUKA
+      fp_dust[i] = fopen(fileBuffDust[i], "r");
+      #endif
+
+      for(j = 0; j < 2; ++j)
+      {
+        getline(&line, &len, fp_dust[i]);
+  
+        if(j==0)
+        {
+          dustMargin = atoi(line);
+        }
+        else if(j==1)
+        {
+          savedLowThr[i]=atoi(line);
+        }
+      }
+      currentDustMargin[i] = dustMargin;
+    }
+    *pageFirstLoad = 0;
+  }
+}
+
 void readCurrParams(int *pageFirstLoad)
 {
   int i;
@@ -106,7 +146,6 @@ void readCurrParams(int *pageFirstLoad)
       if(i==0)
       {
         setCurrent=atoi(line);
-        
       }
     }
     *pageFirstLoad = 0;    
@@ -204,19 +243,8 @@ void checkStopCycle()
 {
   if(readVariableValue("I_3"))
   {
-    struct timespec start, stop;
-    double accum;
-    
-    clock_gettime(CLOCK_REALTIME, &start);    
-    while(accum < 10)
-    {
-      clock_gettime(CLOCK_REALTIME, &stop);
-
-     accum = ( stop.tv_sec - start.tv_sec )
-     + ( stop.tv_nsec - start.tv_nsec )
-     / BILLION;
-    }
     page = 1;
+    sbarText = 5;
   }
 }
 
@@ -255,7 +283,18 @@ void initVars()
      sprintf(fileBuff[i], "/home/luka/PRESA/data/sensor_%d_param.txt", i);
      sprintf(fileBuffRm[i],"rm %s", fileBuff[i]);
      #endif
+     
+     #ifdef RPI
+     sprintf(fileBuffDust[i], "/home/pi/PRESA/data/dust_%d_param.txt", i);
+     sprintf(fileBuffRmDust[i],"rm %s", fileBuffDust[i]);
+     #endif
+    
+     #ifdef LUKA
+     sprintf(fileBuffDust[i], "/home/luka/PRESA/data/dust_%d_param.txt", i);
+     sprintf(fileBuffRmDust[i],"rm %s", fileBuffDust[i]);
+     #endif
    
+
      sprintf(sensorLabels[i], "S%d", count_lab);
      count_lab++;
   }

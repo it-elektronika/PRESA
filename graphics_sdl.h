@@ -30,7 +30,8 @@ extern int oldtimestamp;
 extern int cycleCounter;
 extern int cycleCheck;
 extern int page_main_FirstLoad;
-extern int page_settings_FirstLoad;
+extern int page_settings_screwdriver_FirstLoad;
+extern int page_settings_dust_FirstLoad;
 extern int page_error_SecondLoad;
 
 extern int left_button_selected;
@@ -39,7 +40,7 @@ extern int pageNumber;
 
 extern int pageLoadCount;
 int blinkCounter;
-int selected[4];
+int selected[7];
 int noButtonSelected;
 extern int id;
 
@@ -48,6 +49,7 @@ void freeTexture();
 void renderBackground();
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip);
 int renderText(const char *text, TTF_Font *textFont,  SDL_Color textColor);
+
 void renderStatusBar();
 void renderAdmin(int x, int y, int w, int h, int gotoNum);
 void renderStatOne();
@@ -57,7 +59,9 @@ void renderModeSelect();
 void renderErrorMode1();
 void renderErrorMode2();
 void renderError();
-
+void renderSettings();
+void renderSettingsScrewdriver();
+void renderSettingsDust();
 void touchUpdate();
 void up_button(int x, int y, int *incrementee, int incrementor);
 void down_button(int x, int y, int *decrementee, int decrementor);
@@ -65,5 +69,5 @@ void left_button(int x, int y);
 void right_button(int x, int y);
 
 void button(int x, int y, int w, int h, char *text, int id);
-
+void renderHoleLabels();
 void button_save(int x, int y, int w, int h, int sel);

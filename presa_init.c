@@ -6,6 +6,9 @@ int backgroundColor = 1;
 
 char fileBuff[10][50];
 char fileBuffRm[10][50];
+char fileBuffDust[10][50];
+char fileBuffRmDust[10][50];
+
 
 int sensors[11];
 int sensorsValue[10];
@@ -28,6 +31,14 @@ char marginValue[10][30];
 char savedPlus[10][50];
 char currentPlus[10][50];
 
+
+char currentDustValue[10][50];
+char marginDustValue[10][30];
+char savedMinus[10][50];
+char currentMinus[10][50];
+
+
+
 char currentText[40];
 int setCurrent;
 
@@ -37,6 +48,12 @@ int margin;
 int currentMargin[10];
 int highThr;
 int savedHighThr[10];
+
+int dustMargin;
+int currentDustMargin[10];
+int lowThr;
+int savedLowThr[10];
+
 int errorMode = 0;
 int encoder;
 
@@ -55,5 +72,6 @@ int PiControlHandle_g = -1;
 
 FILE *fp_sens;
 FILE *fp_curr;
+FILE *fp_dust;
 char *line;
 size_t len;
