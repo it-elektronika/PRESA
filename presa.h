@@ -46,8 +46,6 @@ extern char marginDustValue[10][30];
 extern char savedMinus[10][50];
 extern char currentMinus[10][50];
 
-
-
 extern char currentText[40];
 extern int setCurrent;
 

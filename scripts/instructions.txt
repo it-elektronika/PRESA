@@ -1,0 +1,22 @@
+1. Add following lines to /etc/rc.local:
+
+evtest /dev/input/event0 > /home/pi/PRESA/scripts/touch.txt &    #start monitoring touch display and paste output to file for other scripts to check its size 
+dmesg --console-off                                              #disabling messages
+
+
+2. Add/uncomment following line in /etc/lightdm/lightdm.conf:
+xserver-command = X -nocursor                                    #disable mouse cursor
+
+3. Add folowing lines and comment out in .config/lxsession/LXDE-pi/autostart:
+
+#@lxpanel --profile LXDE-pi                                      #disable desktop environment
+#@pcmanfm --desktop --profile LXDE-pi
+#@xscreensaver -no-splash
+#@point-rpi
+
+ 
+@/home/pi/PRESA/scripts/scr.sh                                   #start scripts for touch simulation and program start
+@/home/pi/PRESA/scripts/start_sim_touch.sh
+
+4. Change tty=1 to tty=3 and following lines to end of line /boot/cmdline.txt:   #disable boot messages 
+quiet splash loglevel=0 logo.nologo vt.global_cursor_default=0 plymouth.ignore-serial-consoles 
