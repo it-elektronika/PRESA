@@ -10,3 +10,4 @@ presa: main.o presa.o presa_init.o graphics_sdl.o graphics_init_sdl.o kunbus.o
 
 clean:
 	find . -name "*.o" -type f -delete
+        

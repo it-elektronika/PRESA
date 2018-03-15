@@ -231,6 +231,8 @@ void renderStatusBar()
     case 10:
       renderText("SENZORJI - SMET", regularText, blackColor);
       
+    case 11:
+      renderText("PRESA STISNJENA", regularText, blackColor);
   } 
   
   if(page == 5 || page == 6) 
@@ -320,9 +322,41 @@ void renderInCycle()
 } 
 void renderSettings()
 {
+  readThrParams(&page_settings_FirstLoad);
   renderAdmin(1200, 0, 80, 80,1);
   button(100, 150, 570, 155, "SENZORJI - IZVIJAC", 5);
   button(100, 300, 570, 155, "SENZORJI - SMET", 6);
+
+  sprintf(sensorLowThrText, "SPODNJA MEJA: %d", screwdLowThr);
+  renderText(sensorLowThrText, smallText,  blackColor);
+  render(700, 190, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  sprintf(sensorHighThrText, "ZGORNJA MEJA: %d", screwdHighThr);
+  renderText(sensorHighThrText, smallText,  blackColor);
+  render(700, 240, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  sprintf(dustLowThrText, "SPODNJA MEJA: %d", dustLowThr);
+  renderText(dustLowThrText, smallText,  blackColor);
+  render(700, 340, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  sprintf(dustHighThrText, "ZGORNJA MEJA: %d", dustHighThr);
+  renderText(dustHighThrText, smallText,  blackColor);
+  render(700, 390, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  up_button(1050, 180, &screwdLowThr, 1);
+  down_button(1150, 180, &screwdLowThr, 1);
+
+  up_button(1050, 230, &screwdHighThr, 1);
+  down_button(1150, 230, &screwdHighThr, 1);
+
+  up_button(1050, 330, &dustLowThr, 1);
+  down_button(1150, 330, &dustLowThr, 1);
+
+  up_button(1050, 380, &dustHighThr, 1);
+  down_button(1150, 380, &dustHighThr, 1);
+
+  button_save(1050, 450, 150, 65, -1);
+
 }
 
 void renderSettingsScrewdriver()
@@ -493,7 +527,7 @@ void renderSettingsDust()
 void renderTurnSelect()
 {
   int i;
-  readCurrParams(&page_main_FirstLoad);
+  readCurrParams(&page_intro_FirstLoad);
   sprintf(currentText, "NASTAVITEV NAPETOSTI: %d V", setCurrent/1000);
 
   up_button(1050, 700, &setCurrent, 1000);
@@ -513,6 +547,7 @@ void renderTurnSelect()
 
 void renderModeSelect()
 {
+  
   button(100, 150, 570, 155, "POMIK V IZHODISCE", 0);
   button(100, 300, 570, 155, "ROCNI NACIN", 1);
   button(100, 450, 570, 155, "POL-AVTOMATSKI NACIN", 2);
@@ -520,32 +555,42 @@ void renderModeSelect()
   
   button(800, 150, 400, 155, "NASTAVITVE", 4);
   
-  if(readVariableValue("I_4"))
+  if(checkAir())
   {
     sprintf(airText, "PRITISK ZRAKA: V REDU");
+    renderText(airText, smallText, blackColor);
+    render(800, 600, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
-  else
+  else if(checkAir() == 0 && blinkerCounter > 10)
   {
     sprintf(airText, "PRITISK ZRAKA: NI V REDU");
+    renderText(airText, smallText, blackColor);
+    render(800, 600, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
   
-  if(readVariableValue("I_5"))
+  if(checkOil())
   {
     sprintf(oilText, "NIVO OLJA: V REDU");
+    renderText(oilText, smallText, blackColor);
+    render(800, 650, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
-  else
+  else if(checkOil() == 0 && blinkerCounter > 10)
   {
     sprintf(oilText, "NIVO OLJA: NI V REDU");
+    renderText(oilText, smallText, blackColor);
+    render(800, 650, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
-  renderText(airText, smallText, blackColor);
-  render(800, 600, NULL, 0.0, NULL, SDL_FLIP_NONE);
  
-  renderText(oilText, smallText, blackColor);
-  render(800, 650, NULL, 0.0, NULL, SDL_FLIP_NONE);
-
   sprintf(encoderVal, "POZICIJA: %d%c", encoder, 0x00B0);
   renderText(encoderVal, smallText,  blackColor);
   render(800, 700, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  if(blinkerCounter > 50)  
+  {
+    blinkerCounter = 0;
+  }
+  blinkerCounter++;
+
 }
 
 void renderErrorMode1()
@@ -729,6 +774,19 @@ void renderErrorMode2()
   }
 }
 
+void renderHoming()
+{
+  sprintf(encoderVal, "POZICIJA: %d%c", encoder, 0x00B0);
+  renderText(encoderVal, regularText,  blackColor);
+  render(100, 400, NULL, 0.0, NULL, SDL_FLIP_NONE);
+}
+
+void renderManualMove()
+{
+  sprintf(encoderVal, "POZICIJA: %d%c", encoder, 0x00B0);
+  renderText(encoderVal, regularText,  blackColor);
+  render(100, 400, NULL, 0.0, NULL, SDL_FLIP_NONE);
+}
 
 void renderError()
 {
@@ -775,6 +833,14 @@ void renderContent()
       break;
     case 6:
       renderSettingsDust();
+      backgroundColor = 1;
+      break;
+    case 7:
+      renderHoming();
+      backgroundColor = 1;
+      break;
+    case 8:
+      renderManualMove();
       backgroundColor = 1;
       break;
   }
@@ -1067,6 +1133,24 @@ void button_save(int x, int y, int w, int h, int sel)
       fprintf(fp_dust[sel], "%d\n", savedLowThr[sel]);
       fclose(fp_dust[sel]);
     }
+    if(page == 3)
+    {
+      #ifdef RPI
+      system("rm /home/pi/PRESA/data/param_thr.txt");
+      fp_thr = fopen("/home/pi/PRESA/data/param_thr.txt", "w");	  
+      #endif
+    
+      #ifdef LUKA
+      system("rm /home/luka/PRESA/data/param_thr.txt");
+      fp_thr = fopen("/home/luka/PRESA/data/param_thr.txt", "w");
+      
+      #endif
+      fprintf(fp_thr, "%d\n", screwdLowThr);    
+      fprintf(fp_thr, "%d\n", screwdHighThr);     
+      fprintf(fp_thr, "%d\n", dustLowThr);
+      fprintf(fp_thr, "%d\n", dustHighThr);
+      fclose(fp_thr);
+    }
   }
   /*
   else if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && sel == 1)
@@ -1165,6 +1249,7 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
     {
       page = 3;
       sbarText = 6;
+      page_settings_FirstLoad = 1;
     }
   }
 
@@ -1299,6 +1384,7 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum)
       sbarText = 6;
       page_settings_screwdriver_FirstLoad = 1;
       page_settings_dust_FirstLoad = 1;
+      page_settings_FirstLoad = 1;
     }   
     /* memset(&passText[0], 0, 5); enable if using keypad*/ 
   }

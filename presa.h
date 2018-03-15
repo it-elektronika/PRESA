@@ -5,6 +5,7 @@ extern FILE *fp_sens[10];
 extern FILE *fp_dust[10];
 
 extern FILE *fp_curr;
+extern FILE *fp_thr;
 
 extern char fileBuff[10][50];
 extern char fileBuffRm[10][50];
@@ -24,6 +25,15 @@ extern int sensors[11];
 extern int sensorsValue[10];
 extern int sensorsDust[11];
 extern int sensorsValueDust[10];
+
+extern char sensorLowThrText[30];
+extern char sensorHighThrText[30];
+extern char dustLowThrText[30];
+extern char dustHighThrText[30];
+
+
+
+
 
 extern int dustThr;
 extern char textInsert[20];
@@ -66,10 +76,10 @@ extern int savedLowThr[10];
 extern float divisor;
 extern int substract;
 
-extern int screwdHigh;
-extern int screwdLow;
-extern int dustHigh;
-extern int dustLow;
+extern int screwdHighThr;
+extern int screwdLowThr;
+extern int dustHighThr;
+extern int dustLowThr;
 extern int encoder;
 
 extern int program;
@@ -79,9 +89,16 @@ extern void readSensParams(int *pageFirstLoad);
 extern void readDustParams(int *pageFirstLoad);
 
 extern void readCurrParams(int *pageFirstLoad);
+extern void readThrParams(int *pageFirstLoad);
 extern void checkError();
 extern void checkSelectP0();
 extern void checkSelectP1();
 extern void logicTree();
 extern void initVars();
-extern int encodeRange(int a, int b);
+extern int encodeRange(int a, int b, int mode);
+extern void checkStressSensor();
+extern int checkDoublePress();
+extern int checkOil();
+extern int checkAir();
+extern int checkForceField();
+extern void oneCycle();

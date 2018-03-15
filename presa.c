@@ -29,7 +29,7 @@ void readSensors()  /* handling struct for drawing grids */
  
   for(i = 0; i < 10; ++i)
   {
-    if(sensorsValue[i] > savedHighThr[i] && (encoder >= screwdHigh || encoder <= screwdLow))
+    if(sensorsValue[i] > savedHighThr[i] && encodeRange(screwdHighThr, screwdLowThr, 1))
     {
       sensors[i] = 1;
     }
@@ -38,7 +38,7 @@ void readSensors()  /* handling struct for drawing grids */
       sensors[i] = 0;
     }
 
-    if(sensorsValue[i] < savedLowThr[i] && (encoder <= dustHigh && encoder >= dustLow))
+    if(sensorsValue[i] < savedLowThr[i] && encodeRange(dustLowThr, dustHighThr, 0))
     {
       sensorsDust[i] = 1;
     }
@@ -151,6 +151,43 @@ void readCurrParams(int *pageFirstLoad)
   }
 }
 
+void readThrParams(int *pageFirstLoad)
+{
+  int i;
+  #ifdef RPI
+  fp_thr = fopen("/home/pi/PRESA/data/param_thr.txt", "r");
+  #endif
+  #ifdef LUKA
+  fp_thr = fopen("/home/luka/PRESA/data/param_thr.txt", "r");
+  #endif
+
+  if(*pageFirstLoad) 
+  {
+    for(i = 0; i < 4; ++i)
+    { 
+      getline(&line, &len, fp_thr);
+      
+      if(i==0)
+      {
+        screwdLowThr=atoi(line);
+      }
+      else if(i==1)
+      {
+        screwdHighThr=atoi(line);
+      }
+      else if(i==2)
+      {
+        dustLowThr=atoi(line);
+      }
+      else if(i==3)
+      {
+        dustHighThr=atoi(line);
+      }
+    }
+    *pageFirstLoad = 0;    
+  }
+}
+
 void checkError()
 {
   int i;
@@ -207,31 +244,46 @@ void checkSelectP0()
 
 void checkSelectP1()
 {
-  if(readVariableValue("I_2"))
-  {
+  
     if(selected[0] == 1)
     {
-      sbarText = 0;
+      if(encodeRange(160, 340, 0) == 0  && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      {
+         sbarText = 0;
+         page = 7;
+      }
     }
+  
     else if(selected[1] == 1)
     {
-      sbarText = 1;
+      if(checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      {
+        sbarText = 1;
+        page = 8;
+      }
     }
+
     else if(selected[2] == 1)
     {
-      sbarText = 2;
-      page = 2;
+      if(encodeRange(160, 340, 0) == 0 && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      {
+        sbarText = 2;
+        page = 2;
+      }
     }
     else if(selected[3] == 1)
     {
-      page = 2;
-      sbarText = 3;
+      if(encodeRange(160, 340, 0) == 0 && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      {
+        page = 2;
+        sbarText = 3;
+      }
     }
     else
     {
       sbarText = 5;
     }
-  }
+  
 }
 
 void checkStopCycle()
@@ -256,12 +308,27 @@ void logicTree()
       break; 
     
     case 2:
-      /*if(readVariableValue("I_6") == 1)
+      /*if(readVariableValue("I_6") == 1)    vklopljen reÅim senzorjev
       {*/
       checkError();
       /*}*/
+
+      if(sbarText == 2)
+      {
+        oneCycle();
+      } 
+      else if(sbarText == 3)
+      {
+        checkStopCycle();
+      }   
+      break;
+    
+    case 7:
+      oneCycle();
+      break;  
+    
+    case 8:
       checkStopCycle();
-      printf("IN RANGE:%d\n", encodeRange(100, 200));
       break;
   }
 }
@@ -327,15 +394,98 @@ void timer(int measure)
   */
 }
 
-int encodeRange (int a, int b)
+int encodeRange (int a, int b, int mode)
 {
-  if(encoder >= a && encoder <= b)
+  if(mode==0)
   {
-    return 1; 
+    if(encoder >= a && encoder <= b)
+    {
+      return 1; 
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  else
+  {
+    if(encoder >= a || encoder <= b)
+    {
+      return 1; 
+    }
+    else
+    {
+      return 0;
+    }
+  }
+}
+
+void checkStressSensor()
+{
+  if(readVariableValue("I_7"))
+  {
+    writeVariableValue("O_3", 0);
+  }
+}
+
+int checkDoublePress()
+{
+  if(readVariableValue("I_2"))
+  {
+    return 1;
   }
   else
   {
     return 0;
+  }
+}
+
+int checkOil()
+{
+  if(readVariableValue("I_4"))
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+int checkAir()
+{
+  if(readVariableValue("I_5"))
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+int checkForceField()
+{
+  if(readVariableValue("I_6"))
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+
+
+void oneCycle()
+{
+  writeVariableValue("O3", 1);
+  if(encodeRange(350, 10, 1))
+  {
+    writeVariableValue("O3", 0);
+    sbarText = 5;
+    page = 1;
   }
 }
 /* fire signal when in position between 160 and 340. else off */

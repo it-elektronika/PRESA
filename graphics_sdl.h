@@ -29,7 +29,10 @@ extern int timestamp;
 extern int oldtimestamp;
 extern int cycleCounter;
 extern int cycleCheck;
+extern int page_intro_FirstLoad;
 extern int page_main_FirstLoad;
+
+extern int page_settings_FirstLoad;
 extern int page_settings_screwdriver_FirstLoad;
 extern int page_settings_dust_FirstLoad;
 extern int page_error_SecondLoad;
@@ -40,6 +43,8 @@ extern int pageNumber;
 
 extern int pageLoadCount;
 int blinkCounter;
+int blinkerCounter;
+
 int selected[7];
 int noButtonSelected;
 extern int id;
@@ -62,6 +67,8 @@ void renderError();
 void renderSettings();
 void renderSettingsScrewdriver();
 void renderSettingsDust();
+void renderHoming();
+void renderManualMove();
 void touchUpdate();
 void up_button(int x, int y, int *incrementee, int incrementor);
 void down_button(int x, int y, int *decrementee, int decrementor);

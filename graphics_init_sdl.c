@@ -31,7 +31,9 @@ int pageNumber = 0;
 int cycleCounter = 0;
 int cycleCheck = 0;
 
+int page_intro_FirstLoad = 1;
 int page_main_FirstLoad = 1;
+int page_settings_FirstLoad = 1;
 int page_settings_screwdriver_FirstLoad = 1;
 int page_settings_dust_FirstLoad = 1;
 
@@ -45,5 +47,5 @@ int selected[7];
 int id;
 int noButtonSelected = 1;
 int blinkCounter = 1;
-
+int blnikerCounter = 0;
 

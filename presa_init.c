@@ -15,6 +15,13 @@ int sensorsValue[10];
 int sensorsDust[11];
 int sensorsValueDust[10];
 
+
+char sensorLowThrText[30];
+char sensorHighThrText[30];
+char dustLowThrText[30];
+char dustHighThrText[30];
+
+
 int dustThr = 14000;
 char textInsert[20];
 char sensorVals[10][10];
@@ -60,11 +67,11 @@ int encoder;
 float divisor = 44.455555556;   /* (HIGHEST VALUE - LOWEST VALUE)/360*/
 int substract = 4026;           /* LOWEST VALUE */
 
-int screwdHigh = 300;
-int screwdLow = 110;
+int screwdHighThr = 300;
+int screwdLowThr = 120;
 
-int dustHigh = 299;
-int dustLow = 111;
+int dustHighThr = 299;
+int dustLowThr = 121;
 
 int program = 1;
 
@@ -73,5 +80,7 @@ int PiControlHandle_g = -1;
 FILE *fp_sens;
 FILE *fp_curr;
 FILE *fp_dust;
+FILE *fp_thr;
+
 char *line;
 size_t len;
