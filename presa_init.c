@@ -64,7 +64,7 @@ int savedLowThr[10];
 int errorMode = 0;
 int encoder;
 
-float divisor = 44.455555556;   /* (HIGHEST VALUE - LOWEST VALUE)/360*/
+float divisor = 44.579387187;   /* (HIGHEST VALUE - LOWEST VALUE)/359*/
 int substract = 4026;           /* LOWEST VALUE */
 
 int screwdHighThr = 300;

@@ -244,7 +244,6 @@ void checkSelectP0()
 
 void checkSelectP1()
 {
-  
     if(selected[0] == 1)
     {
       if(encodeRange(160, 340, 0) == 0  && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
@@ -476,12 +475,10 @@ int checkForceField()
   }
 }
 
-
-
 void oneCycle()
 {
   writeVariableValue("O3", 1);
-  if(encodeRange(350, 10, 1))
+  if(encodeRange(355, 5, 1))
   {
     writeVariableValue("O3", 0);
     sbarText = 5;

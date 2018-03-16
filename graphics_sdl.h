@@ -32,7 +32,7 @@ extern int cycleCheck;
 extern int page_intro_FirstLoad;
 extern int page_main_FirstLoad;
 
-extern int page_settings_FirstLoad;
+extern int page_settings_angle_FirstLoad;
 extern int page_settings_screwdriver_FirstLoad;
 extern int page_settings_dust_FirstLoad;
 extern int page_error_SecondLoad;
@@ -45,7 +45,7 @@ extern int pageLoadCount;
 int blinkCounter;
 int blinkerCounter;
 
-int selected[7];
+int selected[8];
 int noButtonSelected;
 extern int id;
 
@@ -64,7 +64,7 @@ void renderModeSelect();
 void renderErrorMode1();
 void renderErrorMode2();
 void renderError();
-void renderSettings();
+void renderSettingsAngle();
 void renderSettingsScrewdriver();
 void renderSettingsDust();
 void renderHoming();
