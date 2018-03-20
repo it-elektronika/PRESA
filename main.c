@@ -5,15 +5,17 @@ int main()
 {
   init();
   initVars(); 
+  maxCount = 2147483647;
   while(program == 1)
   {
     touchUpdate();
     if(page!=4)
     {
+      /*if(readVariableValue("I_8"))*/
       readSensors();
     }
     logicTree();
-     
+    printf("MAX Count: %lu\n", maxCount); 
     renderBackground();
     renderStatusBar(); 
     renderContent();

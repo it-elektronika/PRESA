@@ -33,7 +33,7 @@ extern char dustHighThrText[30];
 
 
 
-
+extern unsigned long maxCount;
 
 extern int dustThr;
 extern char textInsert[20];
@@ -82,6 +82,9 @@ extern int dustHighThr;
 extern int dustLowThr;
 extern int encoder;
 
+int counted;
+int press_count;
+
 extern int program;
 extern void timer(int measure);
 extern void readSensors();
@@ -101,4 +104,7 @@ extern int checkDoublePress();
 extern int checkOil();
 extern int checkAir();
 extern int checkForceField();
+void checkStopMotor();
+void checkFeeder();
+extern void checkPress();
 extern void oneCycle();

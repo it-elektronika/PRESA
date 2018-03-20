@@ -21,6 +21,7 @@ char sensorHighThrText[30];
 char dustLowThrText[30];
 char dustHighThrText[30];
 
+unsigned long maxCount = 0;
 
 int dustThr = 14000;
 char textInsert[20];
@@ -63,6 +64,9 @@ int savedLowThr[10];
 
 int errorMode = 0;
 int encoder;
+
+int counted = 0;
+int press_count = 0;
 
 float divisor = 44.579387187;   /* (HIGHEST VALUE - LOWEST VALUE)/359*/
 int substract = 4026;           /* LOWEST VALUE */

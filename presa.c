@@ -246,7 +246,7 @@ void checkSelectP1()
 {
     if(selected[0] == 1)
     {
-      if(encodeRange(160, 340, 0) == 0  && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      if(encodeRange(160, 340, 0) == 0  && encodeRange(350, 10, 1) == 0 && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
       {
          sbarText = 0;
          page = 7;
@@ -304,6 +304,7 @@ void logicTree()
 
     case 1:
       checkSelectP1(); 
+      checkStopMotor();
       break; 
     
     case 2:
@@ -328,6 +329,7 @@ void logicTree()
     
     case 8:
       checkStopCycle();
+      checkFeeder();
       break;
   }
 }
@@ -360,11 +362,9 @@ void initVars()
      sprintf(fileBuffRmDust[i],"rm %s", fileBuffDust[i]);
      #endif
    
-
      sprintf(sensorLabels[i], "S%d", count_lab);
      count_lab++;
   }
-   
 }
 
 void timer(int measure)
@@ -483,6 +483,68 @@ void oneCycle()
     writeVariableValue("O3", 0);
     sbarText = 5;
     page = 1;
+  }
+}
+
+void checkStopMotor()
+{
+  if(readVariableValue("I_3"))
+  {
+    page = 0;
+    sbarText = 4; 
+  }
+}
+
+void checkFeeder()
+{
+  if(readVariableValue("I_10"))
+  {
+    writeVariableValue("O_10", 1);
+  }
+  else
+  {
+    writeVariableValue("O_10", 0);
+  }
+ 
+  if(readVariableValue("I_11"))
+  {
+    writeVariableValue("O_11", 1);
+  }
+  else
+  {
+    writeVariableValue("O_10", 0);
+  }
+}
+
+
+void feeder()
+{
+  if(readVariableValue("I_12"))
+  {
+    if(encodeRange(50,100, 0))
+    {
+      writeVariableValue("O_7", 1);
+    }
+    else
+    {
+      writeVariableValue("O_7", 0);
+    }
+  }
+}
+
+void checkPress()
+{
+  if(encodeRange(355, 5, 0))
+  {
+    if(!counted)
+    {
+      press_count++;
+      counted = 1;
+    }
+  }
+  if(encodeRange(300, 354, 0))
+  {
+    counted = 0;
   }
 }
 /* fire signal when in position between 160 and 340. else off */
