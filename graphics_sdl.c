@@ -348,8 +348,6 @@ void renderSettings()
   button(100, 150, 570, 155, "SENZORJI - IZVIJAC", 5);
   button(100, 300, 570, 155, "SENZORJI - SMET", 6);
   button(100, 450, 570, 155, "KOTI ZAZNAVANJA", 7);
-  
-  
 }
 
 void renderSettingsAngle()
@@ -415,7 +413,8 @@ void renderSettingsScrewdriver()
   y2 = 150;
 
   readSensParams(&page_settings_screwdriver_FirstLoad);
-  
+  readSensSelectParams(&page_settings_screwdriver_FirstLoadTwo);
+
   renderAdmin(1200, 0, 80, 80,3); 
   
   for(i = 0; i < 10; ++i)
@@ -424,27 +423,37 @@ void renderSettingsScrewdriver()
     sprintf(marginValue[i], "%d", currentMargin[i]);
     sprintf(currentPlus[i], "%d", sensorsValue[i] + currentMargin[i]);
     sprintf(savedPlus[i], "%d",  savedHighThr[i]);
-
-    renderText(currentValue[i], smallText, blackColor);
-    render(170, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-  
-    renderText(marginValue[i], smallText, blackColor);
-    render(450, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-
-    renderText(currentPlus[i], smallText, blackColor);
-    render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-  
-    renderText(savedPlus[i], smallText, blackColor);
-    render(900, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
     
-    renderText(sensorLabels[i], smallText,  blackColor);
-    render(30, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
- 
+    if(i!=9)
+    {  
+      sens_sel_button(30, y, 35, 35, i);
+    }
+    else
+    {
+      sens_sel_button(30, y, 50, 35, i);
+    }
+    if(sens_sel[i])
+    {
+      renderText(currentValue[i], smallText, blackColor);
+      render(170, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+      renderText(marginValue[i], smallText, blackColor);
+      render(450, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
-    up_button(540, y, &currentMargin[i], 1000);
-    down_button(620, y, &currentMargin[i], 1000);
-    button_save(1150, ya, 130, 65, i);
-
+      renderText(currentPlus[i], smallText, blackColor);
+      render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+      renderText(savedPlus[i], smallText, blackColor);
+      render(900, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    
+      renderText(sensorLabels[i], smallText,  blackColor);
+      render(30, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    
+      up_button(540, y, &currentMargin[i], 1000);
+      down_button(620, y, &currentMargin[i], 1000);
+      button_save(1150, ya, 130, 65, i);
+   
+    }
     for(j = 0; j < 5; j++)
     {
       SDL_RenderDrawLine(renderer, x1, y1+j, x2, y2+j);
@@ -498,7 +507,8 @@ void renderSettingsDust()
   y2 = 150;
 
   readDustParams(&page_settings_dust_FirstLoad);
-  
+  readDustSelectParams(&page_settings_dust_FirstLoadTwo);
+
   renderAdmin(1200, 0, 80, 80,3); 
   
   for(i = 0; i < 10; ++i)
@@ -507,25 +517,37 @@ void renderSettingsDust()
     sprintf(marginDustValue[i], "%d", currentDustMargin[i]);
     sprintf(currentMinus[i], "%d", sensorsValue[i] - currentDustMargin[i]);
     sprintf(savedMinus[i], "%d",  savedLowThr[i]);
-
-    renderText(currentDustValue[i], smallText, blackColor);
-    render(170, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-  
-    renderText(marginDustValue[i], smallText, blackColor);
-    render(450, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-
-    renderText(currentMinus[i], smallText, blackColor);
-    render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
-  
-    renderText(savedMinus[i], smallText, blackColor);
-    render(900, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
     
-    renderText(sensorLabels[i], smallText,  blackColor);
-    render(30, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    if(i!=9)
+    {  
+      dust_sel_button(30, y, 35, 35, i);
+    }
+    else
+    {
+      dust_sel_button(30, y, 50, 35, i);
+    }
+ 
+    if(dust_sel[i])
+    {
+      renderText(currentDustValue[i], smallText, blackColor);
+      render(170, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+      renderText(marginDustValue[i], smallText, blackColor);
+      render(450, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
-    up_button(540, y, &currentDustMargin[i], 1000);
-    down_button(620, y, &currentDustMargin[i], 1000);
-    button_save(1150, ya, 130, 65, i);
+      renderText(currentMinus[i], smallText, blackColor);
+      render(700, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  
+      renderText(savedMinus[i], smallText, blackColor);
+      render(900, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+    
+      renderText(sensorLabels[i], smallText,  blackColor);
+      render(30, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+      up_button(540, y, &currentDustMargin[i], 1000);
+      down_button(620, y, &currentDustMargin[i], 1000);
+      button_save(1150, ya, 130, 65, i);
+    }
 
     for(j = 0; j < 5; j++)
     {
@@ -1474,6 +1496,26 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum)
       page_settings_screwdriver_FirstLoad = 1;
       page_settings_dust_FirstLoad = 1;
       page_settings_angle_FirstLoad = 1;
+      page_settings_screwdriver_FirstLoadTwo = 1;
+      page_settings_dust_FirstLoadTwo = 1;
+      
+      fp_sens_sel = fopen("/home/pi/PRESA/data/param_sens_sel.txt", "w");
+
+      for(i = 0; i < 10; i++)
+      {
+        fprintf(fp_sens_sel, "%d\n", sens_sel[i]);
+      }
+      fclose(fp_sens_sel);
+      
+      fp_dust_sel = fopen("/home/pi/PRESA/data/param_dust_sel.txt", "w");
+
+      for(i = 0; i < 10; i++)
+      {
+        fprintf(fp_dust_sel, "%d\n", dust_sel[i]);
+      }
+      fclose(fp_dust_sel);
+
+
     }   
     /* memset(&passText[0], 0, 5); enable if using keypad*/ 
   }
@@ -1543,4 +1585,48 @@ void DrawCircle(SDL_Renderer *Renderer, s32 _x, s32 _y, s32 radius)
    }
 }
 
+
+
 */
+
+void sens_sel_button(int x, int y, int w, int h, int id)
+{
+  SDL_RenderDrawLine(renderer, x, y, (x+w), y);
+  SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
+  SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
+  SDL_RenderDrawLine(renderer, x, (y+h), x, y);      
+
+  if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
+  {
+    if(sens_sel[id]==1)
+    {
+      sens_sel[id] = 0; 
+    }
+    else
+    {
+      sens_sel[id] = 1;
+    }
+  } 
+}
+
+
+
+void dust_sel_button(int x, int y, int w, int h, int id)
+{
+  SDL_RenderDrawLine(renderer, x, y, (x+w), y);
+  SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
+  SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
+  SDL_RenderDrawLine(renderer, x, (y+h), x, y);      
+
+  if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
+  {
+    if(dust_sel[id]==1)
+    {
+      dust_sel[id] = 0; 
+    }
+    else
+    {
+      dust_sel[id] = 1;
+    }
+  } 
+}

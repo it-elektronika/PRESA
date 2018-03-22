@@ -29,7 +29,7 @@ void readSensors()  /* handling struct for drawing grids */
  
   for(i = 0; i < 10; ++i)
   {
-    if(sensorsValue[i] > savedHighThr[i] && encodeRange(screwdHighThr, screwdLowThr, 1))
+    if(sensorsValue[i] > savedHighThr[i] && encodeRange(screwdHighThr, screwdLowThr, 1) && sens_sel[i] )
     {
       sensors[i] = 1;
     }
@@ -38,7 +38,7 @@ void readSensors()  /* handling struct for drawing grids */
       sensors[i] = 0;
     }
 
-    if(sensorsValue[i] < savedLowThr[i] && encodeRange(dustLowThr, dustHighThr, 0))
+    if(sensorsValue[i] < savedLowThr[i] && encodeRange(dustLowThr, dustHighThr, 0) && dust_sel[i])
     {
       sensorsDust[i] = 1;
     }
@@ -240,6 +240,129 @@ void readCountAllParams(int *pageFirstLoad)
   fclose(fp_press_count);
 }
 
+void readSensSelectParams(int *pageFirstLoad)
+{
+  int i;
+  if(*pageFirstLoad)
+  { 
+    #ifdef RPI
+    fp_sens_sel = fopen("/home/pi/PRESA/data/param_sens_sel.txt", "r");
+    #endif
+    #ifdef LUKA
+    fp_sens_sel = fopen("/home/luka/PRESA/data/param_sens_sel.txt", "r");
+    #endif
+
+    for(i = 0; i < 10; ++i)
+    {
+      getline(&line, &len, fp_sens_sel);
+  
+      if(i==0)
+      {
+        sens_sel[0] = atoi(line);
+      }
+      else if(i==1)
+      {
+        sens_sel[1] = atoi(line);
+      }
+      else if(i==2)
+      {
+        sens_sel[2] = atoi(line);
+      }
+      else if(i==3)
+      {
+        sens_sel[3] = atoi(line);
+      }
+      else if(i==4)
+      {
+        sens_sel[4] = atoi(line);
+      }
+      else if(i==5)
+      {
+        sens_sel[5] = atoi(line);
+      }
+      else if(i==6)
+      {
+        sens_sel[6] = atoi(line);
+      }
+      else if(i==7)
+      {
+        sens_sel[7] = atoi(line);
+      }
+      else if(i==8)
+      {
+        sens_sel[8] = atoi(line);
+      }
+      else if(i==9)
+      {
+        sens_sel[9] = atoi(line);
+      }
+    }
+  }
+  *pageFirstLoad = 0;
+}
+
+void readDustSelectParams(int *pageFirstLoad)
+{
+  int i;
+  if(*pageFirstLoad)
+  { 
+    #ifdef RPI
+    fp_dust_sel = fopen("/home/pi/PRESA/data/param_dust_sel.txt", "r");
+    #endif
+    #ifdef LUKA
+    fp_dust_sel = fopen("/home/luka/PRESA/data/param_dust_sel.txt", "r");
+    #endif
+
+    for(i = 0; i < 10; ++i)
+    {
+      getline(&line, &len, fp_dust_sel);
+  
+      if(i==0)
+      {
+        dust_sel[0] = atoi(line);
+      }
+      else if(i==1)
+      {
+        dust_sel[1] = atoi(line);
+      }
+      else if(i==2)
+      {
+        dust_sel[2] = atoi(line);
+      }
+      else if(i==3)
+      {
+        dust_sel[3] = atoi(line);
+      }
+      else if(i==4)
+      {
+        dust_sel[4] = atoi(line);
+      }
+      else if(i==5)
+      {
+        dust_sel[5] = atoi(line);
+      }
+      else if(i==6)
+      {
+        dust_sel[6] = atoi(line);
+      }
+      else if(i==7)
+      {
+        dust_sel[7] = atoi(line);
+      }
+      else if(i==8)
+      {
+        dust_sel[8] = atoi(line);
+      }
+      else if(i==9)
+      {
+        dust_sel[9] = atoi(line);
+      }
+    }
+  }
+  *pageFirstLoad = 0;
+}
+
+
 void checkError()
 {
   int i;
@@ -417,6 +540,9 @@ void initVars()
    
      sprintf(sensorLabels[i], "S%d", count_lab);
      count_lab++;
+
+     sens_sel[i] = 1;
+     dust_sel[i] = 1;
   }
 }
 

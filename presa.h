@@ -8,6 +8,11 @@ extern FILE *fp_curr;
 extern FILE *fp_thr;
 extern FILE *fp_press_count;
 extern FILE *fp_press_count_all;
+extern FILE *fp_sens_sel;
+extern FILE *fp_dust_sel;
+
+
+
 extern char fileBuff[10][50];
 extern char fileBuffRm[10][50];
 
@@ -36,6 +41,8 @@ extern char dustHighThrText[30];
 extern char piece_count_text[30];
 extern char piece_count_text_all[30];
 
+extern int sens_sel[10];
+extern int dust_sel[10];
 
 
 extern unsigned long maxCount;
@@ -101,6 +108,8 @@ extern void readCurrParams(int *pageFirstLoad);
 extern void readThrParams(int *pageFirstLoad);
 extern void readCountParams(int *pageFirstLoad);
 extern void readCountAllParams(int *pageFirstLoad);
+extern void readSensSelectParams(int *pageFirstLoad);
+extern void readDustSelectParams(int *pageFirstLoad);
 extern void checkError();
 extern void checkSelectP0();
 extern void checkSelectP1();

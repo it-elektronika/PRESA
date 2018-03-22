@@ -67,6 +67,10 @@ int savedLowThr[10];
 int errorMode = 0;
 int encoder;
 
+int sens_sel[10];
+int dust_sel[10];
+
+
 int counted = 0;
 long press_count = 0;
 long press_count_all = 0;
@@ -89,6 +93,8 @@ FILE *fp_dust;
 FILE *fp_thr;
 FILE *fp_press_count;
 FILE *fp_press_count_all;
+FILE *fp_sens_sel;
+FILE *fp_dust_sel;
 
 char *line;
 size_t len;

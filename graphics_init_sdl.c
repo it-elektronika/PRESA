@@ -34,9 +34,11 @@ int cycleCheck = 0;
 int page_intro_FirstLoad = 1;
 int page_main_FirstLoad = 1;
 int page_settings_angle_FirstLoad = 1;
+int page_settings_dust_FirstLoadTwo = 1;
+
 int page_settings_screwdriver_FirstLoad = 1;
 int page_settings_dust_FirstLoad = 1;
-
+int page_settings_screwdriver_FirstLoadTwo = 1;
 int page_error_SecondLoad = 1;
 int pageLoadCount = 0;
 

@@ -33,7 +33,11 @@ extern int page_intro_FirstLoad;
 extern int page_main_FirstLoad;
 
 extern int page_settings_angle_FirstLoad;
+
+extern int page_settings_dust_FirstLoadTwo;
+
 extern int page_settings_screwdriver_FirstLoad;
+extern int page_settings_screwdriver_FirstLoadTwo;
 extern int page_settings_dust_FirstLoad;
 extern int page_error_SecondLoad;
 
@@ -78,3 +82,5 @@ void right_button(int x, int y);
 void button(int x, int y, int w, int h, char *text, int id);
 void renderHoleLabels();
 void button_save(int x, int y, int w, int h, int sel);
+void sens_sel_button(int x, int y, int w, int h, int id);
+void dust_sel_button(int x, int y, int w, int h, int id);
