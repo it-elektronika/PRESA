@@ -6,7 +6,8 @@ extern FILE *fp_dust[10];
 
 extern FILE *fp_curr;
 extern FILE *fp_thr;
-
+extern FILE *fp_press_count;
+extern FILE *fp_press_count_all;
 extern char fileBuff[10][50];
 extern char fileBuffRm[10][50];
 
@@ -30,6 +31,10 @@ extern char sensorLowThrText[30];
 extern char sensorHighThrText[30];
 extern char dustLowThrText[30];
 extern char dustHighThrText[30];
+
+
+extern char piece_count_text[30];
+extern char piece_count_text_all[30];
 
 
 
@@ -82,8 +87,9 @@ extern int dustHighThr;
 extern int dustLowThr;
 extern int encoder;
 
-int counted;
-int press_count;
+extern int counted;
+extern long press_count;
+extern long press_count_all;
 
 extern int program;
 extern void timer(int measure);
@@ -93,6 +99,8 @@ extern void readDustParams(int *pageFirstLoad);
 
 extern void readCurrParams(int *pageFirstLoad);
 extern void readThrParams(int *pageFirstLoad);
+extern void readCountParams(int *pageFirstLoad);
+extern void readCountAllParams(int *pageFirstLoad);
 extern void checkError();
 extern void checkSelectP0();
 extern void checkSelectP1();

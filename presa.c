@@ -188,6 +188,58 @@ void readThrParams(int *pageFirstLoad)
   }
 }
 
+void readCountParams(int *pageFirstLoad)
+{
+  int i;
+  #ifdef RPI
+  fp_press_count = fopen("/home/pi/PRESA/data/press_count.txt", "r");
+  #endif
+  #ifdef LUKA
+  fp_press_count = fopen("/home/luka/PRESA/data/press_count.txt", "r");
+  #endif
+
+  if(*pageFirstLoad) 
+  {
+    for(i = 0; i < 4; ++i)
+    { 
+      getline(&line, &len, fp_press_count);
+      
+      if(i==0)
+      {
+        press_count=atoi(line);
+      }
+   }
+   *pageFirstLoad = 0;    
+  }
+  fclose(fp_press_count);
+}
+
+void readCountAllParams(int *pageFirstLoad)
+{
+  int i;
+  #ifdef RPI
+  fp_press_count_all = fopen("/home/pi/PRESA/data/press_count_all.txt", "r");
+  #endif
+  #ifdef LUKA
+  fp_press_count_all = fopen("/home/luka/PRESA/data/press_count_all.txt", "r");
+  #endif
+
+  if(*pageFirstLoad) 
+  {
+    for(i = 0; i < 4; ++i)
+    { 
+      getline(&line, &len, fp_press_count_all);
+      
+      if(i==0)
+      {
+        press_count_all=atoi(line);
+      }
+   }
+   *pageFirstLoad = 0;    
+  }
+  fclose(fp_press_count);
+}
+
 void checkError()
 {
   int i;
@@ -319,6 +371,7 @@ void logicTree()
       } 
       else if(sbarText == 3)
       {
+        checkPress();
         checkStopCycle();
       }   
       break;
@@ -534,11 +587,12 @@ void feeder()
 
 void checkPress()
 {
-  if(encodeRange(355, 5, 0))
+  if(encodeRange(355, 5, 1))
   {
     if(!counted)
     {
       press_count++;
+      press_count_all++;
       counted = 1;
     }
   }

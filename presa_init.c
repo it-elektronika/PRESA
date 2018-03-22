@@ -45,6 +45,8 @@ char marginDustValue[10][30];
 char savedMinus[10][50];
 char currentMinus[10][50];
 
+char piece_count_text[30];
+char piece_count_text_all[30];
 
 
 char currentText[40];
@@ -66,8 +68,8 @@ int errorMode = 0;
 int encoder;
 
 int counted = 0;
-int press_count = 0;
-
+long press_count = 0;
+long press_count_all = 0;
 float divisor = 44.579387187;   /* (HIGHEST VALUE - LOWEST VALUE)/359*/
 int substract = 4026;           /* LOWEST VALUE */
 
@@ -85,6 +87,8 @@ FILE *fp_sens;
 FILE *fp_curr;
 FILE *fp_dust;
 FILE *fp_thr;
+FILE *fp_press_count;
+FILE *fp_press_count_all;
 
 char *line;
 size_t len;

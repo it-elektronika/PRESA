@@ -267,6 +267,15 @@ void renderInCycle()
   SDL_RenderDrawRect(renderer, &bar1);
   SDL_RenderDrawRect(renderer, &bar2);
   
+  fp_press_count = fopen("/home/pi/PRESA/data/press_count.txt", "w");
+  fprintf(fp_press_count, "%lu\n", press_count);
+  fclose(fp_press_count);
+  
+  fp_press_count_all = fopen("/home/pi/PRESA/data/press_count_all.txt", "w");
+  fprintf(fp_press_count_all, "%lu\n", press_count_all);
+  fclose(fp_press_count_all);
+
+
   for(i = 0; i < 5; i++)
   {
     holes[i].x = 50;
@@ -281,6 +290,13 @@ void renderInCycle()
   sprintf(encoderVal, "POZICIJA: %d%c", encoder, 0x00B0);
   renderText(encoderVal, smallText,  blackColor);
   render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+  sprintf(piece_count_text, "ST. KOSOV: %lu", press_count);
+  renderText(piece_count_text, smallText,  blackColor);
+  render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
+
+
 /*
   sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr[0]);
   renderText(savedPlus, smallText, blackColor);
@@ -332,6 +348,8 @@ void renderSettings()
   button(100, 150, 570, 155, "SENZORJI - IZVIJAC", 5);
   button(100, 300, 570, 155, "SENZORJI - SMET", 6);
   button(100, 450, 570, 155, "KOTI ZAZNAVANJA", 7);
+  
+  
 }
 
 void renderSettingsAngle()
@@ -546,6 +564,11 @@ void renderTurnSelect()
 {
   int i;
   readCurrParams(&page_intro_FirstLoad);
+  page_intro_FirstLoad = 1;
+  readCountParams(&page_intro_FirstLoad);
+  page_intro_FirstLoad = 1;
+  readCountAllParams(&page_intro_FirstLoad);
+
   sprintf(currentText, "STEVILO UDARCEV NA MINUTO: %d", (int)round(setCurrent/138.888888889));
   
   if(setCurrent <=9999)
@@ -616,6 +639,16 @@ void renderModeSelect()
     render(800, 650, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
  
+  sprintf(piece_count_text, "ST. KOSOV: %lu", press_count);
+  renderText(piece_count_text, smallText,  blackColor);
+  render(800, 400, NULL, 0.0, NULL, SDL_FLIP_NONE);
+ 
+  button(1100, 400, 30, 30, "R", 8);
+
+  sprintf(piece_count_text_all, "ST. KOSOV SKUPAJ: %lu", press_count_all);
+  renderText(piece_count_text_all, smallText,  blackColor);
+  render(800, 450, NULL, 0.0, NULL, SDL_FLIP_NONE);
+
   sprintf(encoderVal, "POZICIJA: %d%c", encoder, 0x00B0);
   renderText(encoderVal, smallText,  blackColor);
   render(800, 700, NULL, 0.0, NULL, SDL_FLIP_NONE);
@@ -1332,6 +1365,23 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
       /*page_settings_angle_FirstLoad = 1;*/
       page = 9;
       sbarText = 12;
+    }
+  }
+
+  else if(id == 8)
+  {
+    SDL_RenderDrawLine(renderer, x, y, (x+w), y);
+    SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
+    SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
+    SDL_RenderDrawLine(renderer, x, (y+h), x, y);      
+    
+    renderText(text, smallText, blackColor);
+    render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
+  
+    if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
+    {
+      /*page_settings_angle_FirstLoad = 1;*/
+      press_count = 0;
     }
   }
 }
