@@ -585,12 +585,7 @@ void renderSettingsDust()
 void renderTurnSelect()
 {
   int i;
-  readCurrParams(&page_intro_FirstLoad);
-  page_intro_FirstLoad = 1;
-  readCountParams(&page_intro_FirstLoad);
-  page_intro_FirstLoad = 1;
-  readCountAllParams(&page_intro_FirstLoad);
-
+  
   sprintf(currentText, "STEVILO UDARCEV NA MINUTO: %d", (int)round(setCurrent/138.888888889));
   
   if(setCurrent <=9999)
@@ -616,7 +611,6 @@ void renderTurnSelect()
 
 void renderModeSelect()
 {
-  page_intro_FirstLoad = 1;
   if(right_button_selected)
   {
 
@@ -1404,6 +1398,9 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
     {
       /*page_settings_angle_FirstLoad = 1;*/
       press_count = 0;
+      fp_press_count = fopen("/home/pi/PRESA/data/press_count.txt", "w");
+      fprintf(fp_press_count, "%lu\n", press_count);
+      fclose(fp_press_count);
     }
   }
 }

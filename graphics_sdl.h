@@ -29,7 +29,7 @@ extern int timestamp;
 extern int oldtimestamp;
 extern int cycleCounter;
 extern int cycleCheck;
-extern int page_intro_FirstLoad;
+
 extern int page_main_FirstLoad;
 
 extern int page_settings_angle_FirstLoad;
@@ -49,7 +49,7 @@ extern int pageLoadCount;
 int blinkCounter;
 int blinkerCounter;
 
-int selected[8];
+int selected[9];
 int noButtonSelected;
 extern int id;
 

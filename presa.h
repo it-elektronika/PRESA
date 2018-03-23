@@ -104,10 +104,10 @@ extern void readSensors();
 extern void readSensParams(int *pageFirstLoad);
 extern void readDustParams(int *pageFirstLoad);
 
-extern void readCurrParams(int *pageFirstLoad);
+extern void readCurrParams();
 extern void readThrParams(int *pageFirstLoad);
-extern void readCountParams(int *pageFirstLoad);
-extern void readCountAllParams(int *pageFirstLoad);
+extern void readCountParams();
+extern void readCountAllParams();
 extern void readSensSelectParams(int *pageFirstLoad);
 extern void readDustSelectParams(int *pageFirstLoad);
 extern void checkError();

@@ -127,7 +127,7 @@ void readDustParams(int *pageFirstLoad)
   }
 }
 
-void readCurrParams(int *pageFirstLoad)
+void readCurrParams()
 {
   int i;
   #ifdef RPI
@@ -137,17 +137,13 @@ void readCurrParams(int *pageFirstLoad)
   fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "r");
   #endif
 
-  if(*pageFirstLoad) 
-  {
-    for(i = 0; i < 1; ++i)
-    { 
-      getline(&line, &len, fp_curr);
-      if(i==0)
-      {
-        setCurrent=atoi(line);
-      }
+  for(i = 0; i < 1; ++i)
+  { 
+    getline(&line, &len, fp_curr);
+    if(i==0)
+    {
+      setCurrent=atoi(line);
     }
-    *pageFirstLoad = 0;    
   }
 }
 
@@ -188,7 +184,7 @@ void readThrParams(int *pageFirstLoad)
   }
 }
 
-void readCountParams(int *pageFirstLoad)
+void readCountParams()
 {
   int i;
   #ifdef RPI
@@ -198,23 +194,18 @@ void readCountParams(int *pageFirstLoad)
   fp_press_count = fopen("/home/luka/PRESA/data/press_count.txt", "r");
   #endif
 
-  if(*pageFirstLoad) 
-  {
-    for(i = 0; i < 4; ++i)
-    { 
-      getline(&line, &len, fp_press_count);
-      
-      if(i==0)
-      {
-        press_count=atoi(line);
-      }
-   }
-   *pageFirstLoad = 0;    
+  for(i = 0; i < 4; ++i)
+  { 
+    getline(&line, &len, fp_press_count);
+    if(i==0)
+    {
+      press_count=atoi(line);
+    }
   }
   fclose(fp_press_count);
 }
 
-void readCountAllParams(int *pageFirstLoad)
+void readCountAllParams()
 {
   int i;
   #ifdef RPI
@@ -223,19 +214,13 @@ void readCountAllParams(int *pageFirstLoad)
   #ifdef LUKA
   fp_press_count_all = fopen("/home/luka/PRESA/data/press_count_all.txt", "r");
   #endif
-
-  if(*pageFirstLoad) 
-  {
-    for(i = 0; i < 4; ++i)
-    { 
-      getline(&line, &len, fp_press_count_all);
-      
-      if(i==0)
-      {
-        press_count_all=atoi(line);
-      }
-   }
-   *pageFirstLoad = 0;    
+  for(i = 0; i < 4; ++i)
+  { 
+    getline(&line, &len, fp_press_count_all);
+    if(i==0)
+    {
+      press_count_all=atoi(line);
+    }
   }
   fclose(fp_press_count);
 }
@@ -544,6 +529,9 @@ void initVars()
      sens_sel[i] = 1;
      dust_sel[i] = 1;
   }
+  readCurrParams();
+  readCountParams();
+  readCountAllParams();
 }
 
 void timer(int measure)
