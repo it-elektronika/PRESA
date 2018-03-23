@@ -398,6 +398,7 @@ void checkSelectP0()
       fprintf(fp_curr, "%d\n", setCurrent);
       fclose(fp_curr);
       writeVariableValue("OutputValue_1_i05", setCurrent); 
+      /*program = 0;*/
     } 
   }
 }

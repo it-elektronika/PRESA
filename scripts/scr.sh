@@ -15,9 +15,10 @@ done
 if ! $bool; then
   pkill -f evtest
   rm -f /home/pi/PRESA/scripts/touch.txt
+  rm -f /home/pi/PRESA/scripts/output.txt
   cd PRESA
   make clean
   make
-  ./presa
+  ./presa > output.txt
   #rm /home/pi/touch.txt
 fi

@@ -5,10 +5,8 @@ int main()
 {
   init();
   initVars(); 
-  maxCount = 2147483000;
   while(program == 1)
   {
-    maxCount++;
     touchUpdate();
     if(page!=4)
     {
@@ -23,6 +21,7 @@ int main()
     /*
     printf("x: %d y: %d\n", touchLocation.x, touchLocation.y);
     printf("page: %d, sbText: %d\n", page, sbarText);*/
+    /*printf("setCurrent:%d\n", setCurrent);*/
   }
   return 0;
 }
