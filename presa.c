@@ -145,6 +145,7 @@ void readCurrParams()
       setCurrent=atoi(line);
     }
   }
+  fclose(fp_curr);
 }
 
 void readThrParams(int *pageFirstLoad)
@@ -387,18 +388,7 @@ void checkSelectP0()
     {
       page = 1;
       sbarText = 5;
-      #ifdef RPI
-      system("rm /home/pi/PRESA/data/param_curr.txt");	  
-      fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "w");
-      #endif
-      #ifdef LUKA
-      system("rm /home/luka/PRESA/data/param_curr.txt");	  
-      fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "w");
-      #endif
-      fprintf(fp_curr, "%d\n", setCurrent);
-      fclose(fp_curr);
-      writeVariableValue("OutputValue_1_i05", setCurrent); 
-      /*program = 0;*/
+     /*program = 0;*/
     } 
   }
 }

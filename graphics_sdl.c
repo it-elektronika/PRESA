@@ -993,10 +993,29 @@ void up_button(int x,  int y, int *incrementee, int incrementor)
 
   if(touchLocation.x > x && touchLocation.x < x+imageSurface->w && touchLocation.y > y && touchLocation.y < y + imageSurface->h && timestamp > oldtimestamp)
   {
-    
-    if(*incrementee <= 9999)
+    if(page==0)
     {
-      *incrementee = *incrementee + incrementor;
+      if(*incrementee <= 9999)
+      {
+      
+        *incrementee = *incrementee + incrementor;
+        #ifdef RPI
+        fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "w");
+        #endif
+        #ifdef LUKA
+        fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "w");
+        #endif 
+        fprintf(fp_curr, "%d\n", setCurrent);
+        fclose(fp_curr);
+      }
+      /*writeVariableValue("OutputValue_1_i05", setCurrent);*/
+    } 
+    else if(page!=0)
+    {
+      if(*incrementee <= 9999)
+      {
+        *incrementee = *incrementee + incrementor;
+      }
     }
   }
 }
@@ -1033,9 +1052,28 @@ void down_button(int x, int y, int *decrementee, int decrementor)
 
   if(touchLocation.x > x && touchLocation.x < x+imageSurface->w && touchLocation.y > y && touchLocation.y < y + imageSurface->h && timestamp > oldtimestamp)
   {
-    if(*decrementee > 0)
+    if(page==0)
     {
-     *decrementee = *decrementee - decrementor;
+      if(*decrementee > 0)
+      {
+       *decrementee = *decrementee - decrementor;
+       #ifdef RPI
+       fp_curr = fopen("/home/pi/PRESA/data/param_curr.txt", "w");
+       #endif
+       #ifdef LUKA
+       fp_curr = fopen("/home/luka/PRESA/data/param_curr.txt", "w");
+       #endif
+       fprintf(fp_curr, "%d\n", setCurrent);
+       fclose(fp_curr);
+      }
+      /*writeVariableValue("OutputValue_1_i05", setCurrent);*/
+    }
+    else if(page!=0)
+    {
+      if(*decrementee > 0)
+      {
+       *decrementee = *decrementee - decrementor;
+      }
     }
   }
 }
