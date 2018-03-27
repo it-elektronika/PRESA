@@ -12,8 +12,9 @@
 void readSensors()  /* handling struct for drawing grids */
 {  
   int i;
-  encoder = round((readVariableValue("InputValue_1_i04")-substract)/divisor);
-  
+  /*encoder = round((readVariableValue("InputValue_1_i04")-substract)/divisor);*/
+  encoder = readVariableValue("RTDValue_1_i05");
+
   /* IF encoder in right position read values */
   
   sensorsValue[0] = readVariableValue("InputValue_1");
@@ -352,32 +353,36 @@ void readDustSelectParams(int *pageFirstLoad)
 void checkError()
 {
   int i;
-  for(i = 0; i < 4; i++)
+  if(readVariableValue("I_5"))
   {
-    if(sensors[i] == 1)
+  
+    for(i = 0; i < 4; i++)
     {
-      errorMode = 1;
-      page = 4;
-      sbarText = 7;
-      break;
+      if(sensors[i] == 1)
+      {
+        errorMode = 1;
+        page = 4;
+        sbarText = 7;
+        break;
+      }
+      else
+      {
+        errorMode = 0;
+      }
+      if(sensorsDust[i]== 1)
+      {
+        errorMode = 2;
+        page = 4;
+        sbarText = 8;
+        break;
+      }
+      else
+      {
+        errorMode = 0;
+      }
     }
-    else
-    {
-      errorMode = 0;
-    }
-    if(sensorsDust[i]== 1)
-    {
-      errorMode = 2;
-      page = 4;
-      sbarText = 8;
-      break;
-    }
-    else
-    {
-      errorMode = 0;
-    }
+    printf("ERROR MODE: %d\n", errorMode); 
   }
-  printf("ERROR MODE: %d\n", errorMode); 
 } 
  
 void checkSelectP0()
@@ -397,7 +402,7 @@ void checkSelectP1()
 {
     if(selected[0] == 1)
     {
-      if(encodeRange(160, 340, 0) == 0  && encodeRange(350, 10, 1) == 0 && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      if(encodeRange(160, 340, 0) == 0  && encodeRange(350, 10, 1) == 0 && confirmSelection()/* &&checkOil() && checkAir() && checkForceField()*/)
       {
          sbarText = 0;
          page = 7;
@@ -415,7 +420,7 @@ void checkSelectP1()
 
     else if(selected[2] == 1)
     {
-      if(encodeRange(160, 340, 0) == 0 && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      if(encodeRange(160, 340, 0) == 0 && confirmSelection()/* &&checkOil() && checkAir() && checkForceField()*/)
       {
         sbarText = 2;
         page = 2;
@@ -423,7 +428,7 @@ void checkSelectP1()
     }
     else if(selected[3] == 1)
     {
-      if(encodeRange(160, 340, 0) == 0 && checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      if(encodeRange(160, 340, 0) == 0 && confirmSelection()/* &&checkOil() && checkAir() && checkForceField()*/)
       {
         page = 2;
         sbarText = 3;
@@ -438,11 +443,30 @@ void checkSelectP1()
 
 void checkStopCycle()
 {
-  if(readVariableValue("I_3"))
+  if(readVariableValue("I_4"))
   {
     page = 1;
     sbarText = 5;
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
   }
+}
+ 
+void checkStartMotor()
+{
+  if(left_button_selected && readVariableValue("I_9")) /* IZBRANA LEVA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
+  {
+    writeVariableValue("O_2", 1);  /* VKLOP MOTORJA V LEVO */ 
+    page = 1;
+    sbarText = 5;
+  } 
+  else if(right_button_selected && readVariableValue("I_10")) /* IZBRANA DESNA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
+  {
+    writeVariableValue("O_3", 1);  /* VKLOP MOTORJA V DESNO */    
+    page = 1;
+    sbarText = 5;
+  } 
 }
 
 void logicTree()
@@ -450,12 +474,13 @@ void logicTree()
   switch(page)
   {
     case 0:
-      checkSelectP0();
+      checkStartMotor();
       break;
 
     case 1:
       checkSelectP1(); 
       checkStopMotor();
+      checkSelection();
       break; 
     
     case 2:
@@ -463,7 +488,7 @@ void logicTree()
       {*/
       checkError();
       /*}*/
-
+      feeder();
       if(sbarText == 2)
       {
         oneCycle();
@@ -481,7 +506,6 @@ void logicTree()
     
     case 8:
       checkStopCycle();
-      checkFeeder();
       break;
   }
 }
@@ -525,7 +549,7 @@ void initVars()
   readCountAllParams();
 }
 
-void timer(int measure)
+void timer(float measure)
 {
   struct timespec start, stop;
   double accum;
@@ -539,16 +563,6 @@ void timer(int measure)
      + ( stop.tv_nsec - start.tv_nsec )
      / BILLION;
   }
-  /*
-  if(accum >= measure)
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  } 
-  */
 }
 
 int encodeRange (int a, int b, int mode)
@@ -577,62 +591,6 @@ int encodeRange (int a, int b, int mode)
   }
 }
 
-void checkStressSensor()
-{
-  if(readVariableValue("I_7"))
-  {
-    writeVariableValue("O_3", 0);
-  }
-}
-
-int checkDoublePress()
-{
-  if(readVariableValue("I_2"))
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-int checkOil()
-{
-  if(readVariableValue("I_4"))
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-int checkAir()
-{
-  if(readVariableValue("I_5"))
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-int checkForceField()
-{
-  if(readVariableValue("I_6"))
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
 void oneCycle()
 {
   writeVariableValue("O3", 1);
@@ -644,49 +602,71 @@ void oneCycle()
   }
 }
 
+
+
+
+
 void checkStopMotor()
 {
-  if(readVariableValue("I_3"))
+  if(left_button_selected && readVariableValue("I_2")) /* IZBRANA LEVA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
   {
+    writeVariableValue("O_2", 0);  /* VKLOP MOTORJA V LEVO */ 
     page = 0;
-    sbarText = 4; 
+    sbarText = 4;
+    timer(20);
+  } 
+  else if(right_button_selected && readVariableValue("I_2")) /* IZBRANA DESNA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
+  {
+    writeVariableValue("O_3", 0);  /* VKLOP MOTORJA V DESNO */    
+    page = 0;
+    sbarText = 4;
+    timer(20);
   }
 }
 
-void checkFeeder()
+
+
+
+void feeder() /* PODAJALNIK IZVIJACEV */
 {
-  if(readVariableValue("I_10"))
+  if(readVariableValue("I_6"))
+  {
+    if(readVariableValue("I_7"))
+    {
+      writeVariableValue("O_7", 1);
+      timer(0.2);
+      writeVariableValue("O_7", 0);
+    }
+    if(readVariableValue("I_8"))
+    {
+      writeVariableValue("O_8", 1);
+      timer(0.2);
+      writeVariableValue("O_8", 0);
+    }
+  }
+}
+
+void blowAir()
+{
+  if(encodeRange(355, 55, 1))
   {
     writeVariableValue("O_10", 1);
   }
-  else
-  {
-    writeVariableValue("O_10", 0);
-  }
- 
-  if(readVariableValue("I_11"))
-  {
-    writeVariableValue("O_11", 1);
-  }
-  else
+  else if(encodeRange(56, 354, 0))
   {
     writeVariableValue("O_10", 0);
   }
 }
 
-
-void feeder()
+void screwdriverSpring()
 {
-  if(readVariableValue("I_12"))
+  if(encodeRange(110, 300, 0))
   {
-    if(encodeRange(50,100, 0))
-    {
-      writeVariableValue("O_7", 1);
-    }
-    else
-    {
-      writeVariableValue("O_7", 0);
-    }
+    writeVariableValue("O_11", 1);
+  }
+  else if(encodeRange(301, 109, 1))
+  {
+    writeVariableValue("O_11", 0);
   }
 }
 
@@ -706,4 +686,126 @@ void checkPress()
     counted = 0;
   }
 }
-/* fire signal when in position between 160 and 340. else off */
+
+void checkSelection()
+{
+  if(selected[0] == 1 || selected[2] == 1 || selected[3] == 1)
+  {
+    writeVariableValue("O_4", 1);
+    writeVariableValue("0_5", 0);
+  }
+  else if(selected[1] == 1)
+  {
+    writeVariableValue("O_4", 0);
+    writeVariableValue("O_5", 1);
+  }
+  else if(selected[0] == 1 || selected[1] == 1 || selected[2] == 1 || selected[3] == 1)
+  {
+    writeVariableValue("O_4", 0);
+    writeVariableValue("O_5", 0);
+  }
+}
+
+int confirmSelection()
+{
+  if(readVariableValue("I_3"))
+  {
+    return 1;
+  }
+  return 0;
+}
+
+void checkStressSensor()
+{
+  if(readVariableValue("RTDValue_2_i05"))
+  {
+    writeVariableValue("O_3", 0);
+  }
+}
+
+int checkDoublePress()
+{
+  if(readVariableValue("I_1") && readVariableValue("I_2"))
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+int checkOil()
+{
+  if(readVariableValue("RTDValue_2_i04"))
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+int checkAir()
+{
+  if(readVariableValue("RTDValue_1_i05"))
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+int checkForceField()
+{
+  if(readVariableValue("I_12"))
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+int checkZeroPosition()
+{
+  if(readVariableValue("I_11"))
+  {
+    return 1;
+  }
+  return 0;
+
+}
+
+
+int checkStopTotal()
+{
+  if(readVariableValue("RTDValue_1"))
+  {
+    return 1;
+  }
+  return 0;
+}
+
+int checkMotorDriverError()
+{
+  if(readVariableValue("RTDValue_2"))
+  {
+    return 1;
+  }
+  return 0;
+}
+
+int checkClutchError()
+{
+  if(readVariableValue("RTDValue_1_i04"))
+  {
+    return 1;
+  }
+  return 0;
+}
+

@@ -1339,17 +1339,7 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
     }
   }
   
-  else if(id == 1)
-  {
-    if(selected[id])
-    {
-      writeVariableValue("O_14", 1);
-    }
-    else
-    {
-      writeVariableValue("O_14", 0);
-    }
-  }
+  
   
   else if(id == 4)
   {

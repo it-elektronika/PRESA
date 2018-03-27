@@ -99,7 +99,7 @@ extern long press_count;
 extern long press_count_all;
 
 extern int program;
-extern void timer(int measure);
+extern void timer(float measure);
 extern void readSensors();
 extern void readSensParams(int *pageFirstLoad);
 extern void readDustParams(int *pageFirstLoad);
@@ -122,6 +122,14 @@ extern int checkOil();
 extern int checkAir();
 extern int checkForceField();
 void checkStopMotor();
-void checkFeeder();
 extern void checkPress();
 extern void oneCycle();
+void feeder();
+int confirmSelection();
+void checkSelection();
+void blowAir();
+void screwdriverSpring();
+int checkZeroPosition();
+int checkStopTotal();
+int checkMotorDriverError();
+
