@@ -1008,7 +1008,7 @@ void up_button(int x,  int y, int *incrementee, int incrementor)
         fprintf(fp_curr, "%d\n", setCurrent);
         fclose(fp_curr);
       }
-      /*writeVariableValue("OutputValue_1_i05", setCurrent);*/
+      writeVariableValue("OutputValue_4_i05", setCurrent);
     } 
     else if(page!=0)
     {

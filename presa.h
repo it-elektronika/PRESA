@@ -11,7 +11,7 @@ extern FILE *fp_press_count_all;
 extern FILE *fp_sens_sel;
 extern FILE *fp_dust_sel;
 
-
+int procedure;
 
 extern char fileBuff[10][50];
 extern char fileBuffRm[10][50];
@@ -132,4 +132,7 @@ void screwdriverSpring();
 int checkZeroPosition();
 int checkStopTotal();
 int checkMotorDriverError();
+
+void startClutch();
+void stopClutch();
 

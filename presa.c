@@ -13,20 +13,20 @@ void readSensors()  /* handling struct for drawing grids */
 {  
   int i;
   /*encoder = round((readVariableValue("InputValue_1_i04")-substract)/divisor);*/
-  encoder = readVariableValue("RTDValue_1_i05");
+  encoder = readVariableValue("InputValue_3_i05");
 
   /* IF encoder in right position read values */
   
-  sensorsValue[0] = readVariableValue("InputValue_1");
-  sensorsValue[1] = readVariableValue("InputValue_2");
-  sensorsValue[2] = readVariableValue("InputValue_3");
-  sensorsValue[3] = readVariableValue("InputValue_4");
-  sensorsValue[4] = readVariableValue("InputValue_2_i04");
-  sensorsValue[5] = readVariableValue("InputValue_3_i04");
-  sensorsValue[6] = readVariableValue("InputValue_4_i04");
-  sensorsValue[7] = readVariableValue("InputValue_2_i05");
-  sensorsValue[8] = readVariableValue("InputValue_3_i05");
-  sensorsValue[9] = readVariableValue("InputValue_4_i05");
+  sensorsValue[0] = readVariableValue("InputValue_1");      /*  1 */
+  sensorsValue[1] = readVariableValue("InputValue_2_i04");      /*  2 */
+  sensorsValue[2] = readVariableValue("InputValue_2");      /*  3 */
+  sensorsValue[3] = readVariableValue("InputValue_3_i04");      /*  4 */
+  sensorsValue[4] = readVariableValue("InputValue_3");  /*  5 */
+  sensorsValue[5] = readVariableValue("InputValue_4_i04");  /*  6 */
+  sensorsValue[6] = readVariableValue("InputValue_4");  /*  7 */
+  sensorsValue[7] = readVariableValue("InputValue_1_i05");  /*  8 */
+  sensorsValue[8] = readVariableValue("InputValue_1_i04");  /*  9 */
+  sensorsValue[9] = readVariableValue("InputValue_2_i05");  /* 10 */
  
   for(i = 0; i < 10; ++i)
   {
@@ -445,6 +445,7 @@ void checkStopCycle()
 {
   if(readVariableValue("I_4"))
   {
+    procedure = 0;
     page = 1;
     sbarText = 5;
     writeVariableValue("O_9", 1);
@@ -469,6 +470,16 @@ void checkStartMotor()
   } 
 }
 
+void startClutch()
+{
+  writeVariableValue("O_6", 1);
+}
+
+void stopClutch()
+{
+  writeVariableValue("O_6", 0);
+}
+
 void logicTree()
 {
   switch(page)
@@ -484,28 +495,34 @@ void logicTree()
       break; 
     
     case 2:
-      /*if(readVariableValue("I_6") == 1)    vklopljen reÅim senzorjev
-      {*/
-      checkError();
-      /*}*/
-      feeder();
-      if(sbarText == 2)
+      while(procedure)
+      {
+        checkError();
+        feeder();
+        if(sbarText == 2)
+        {
+          oneCycle();
+        } 
+        else if(sbarText == 3)
+        {
+          checkPress();
+        }   
+        checkStopCycle();
+      }
+      break;
+
+    case 7:
+      while(procedure)
       {
         oneCycle();
-      } 
-      else if(sbarText == 3)
-      {
-        checkPress();
-        checkStopCycle();
-      }   
-      break;
-    
-    case 7:
-      oneCycle();
+      }
       break;  
     
     case 8:
-      checkStopCycle();
+      while(procedure)
+      {
+        checkStopCycle();
+      }
       break;
   }
 }
@@ -593,12 +610,10 @@ int encodeRange (int a, int b, int mode)
 
 void oneCycle()
 {
-  writeVariableValue("O3", 1);
+  startClutch();
   if(encodeRange(355, 5, 1))
   {
-    writeVariableValue("O3", 0);
-    sbarText = 5;
-    page = 1;
+    stopClutch();
   }
 }
 
@@ -725,8 +740,9 @@ void checkStressSensor()
 
 int checkDoublePress()
 {
-  if(readVariableValue("I_1") && readVariableValue("I_2"))
+  if(readVariableValue("I_1") && readVariableValue("I_2") == 0)
   {
+    procedure = 1;
     return 1;
   }
   else
@@ -808,4 +824,5 @@ int checkClutchError()
   }
   return 0;
 }
+
 

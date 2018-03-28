@@ -9,6 +9,7 @@ char fileBuffRm[10][50];
 char fileBuffDust[10][50];
 char fileBuffRmDust[10][50];
 
+int procedure = 0;
 
 int sensors[11];
 int sensorsValue[10];
