@@ -1,2 +1,0 @@
-testing current_param zeroing
-instead of writing appending to file:

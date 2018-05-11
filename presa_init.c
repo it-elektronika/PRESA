@@ -10,13 +10,20 @@ char fileBuffDust[10][50];
 char fileBuffRmDust[10][50];
 
 int procedure = 0;
+int stop_step = 0;
+int oneCycleStop = 0;
+int delay_stop = 1;
+int rpm;
+float a;
+int stop_angle;
+int hold_red;
 
 int sensors[11];
 int sensorsValue[10];
 int sensorsDust[11];
 int sensorsValueDust[10];
 
-
+int feeder_step = 0;
 char sensorLowThrText[30];
 char sensorHighThrText[30];
 char dustLowThrText[30];
@@ -53,8 +60,9 @@ char piece_count_text_all[30];
 char currentText[40];
 int setCurrent;
 
-char airText[30];
-char oilText[30];
+char airText[40];
+char oilText[40];
+char driverText[40];
 int margin;
 int currentMargin[10];
 int highThr;
@@ -78,11 +86,10 @@ long press_count_all = 0;
 float divisor = 44.579387187;   /* (HIGHEST VALUE - LOWEST VALUE)/359*/
 int substract = 4026;           /* LOWEST VALUE */
 
-int screwdHighThr = 300;
-int screwdLowThr = 120;
-
-int dustHighThr = 299;
-int dustLowThr = 121;
+int screwdHighThr;
+int screwdLowThr;
+int dustHighThr;
+int dustLowThr;
 
 int program = 1;
 
@@ -96,6 +103,6 @@ FILE *fp_press_count;
 FILE *fp_press_count_all;
 FILE *fp_sens_sel;
 FILE *fp_dust_sel;
-
+FILE *fp_encoder;
 char *line;
 size_t len;

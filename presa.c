@@ -9,12 +9,14 @@
 #include "graphics_sdl.h"
 
 
-void readSensors()  /* handling struct for drawing grids */
+void readSensors()  /* BRANJE SENZORJEV IN PREVERJANJE NEDOVOLJENJIH VREDNOSTI */
 {  
   int i;
-  /*encoder = round((readVariableValue("InputValue_1_i04")-substract)/divisor);*/
-  encoder = readVariableValue("InputValue_3_i05");
-
+  
+  encoder = round((readVariableValue("InputValue_3_i05")-substract)/divisor);
+ 
+  /*encoder = readVariableValue("InputValue_3_i05");*/
+  /*encoder = 100;*/
   /* IF encoder in right position read values */
   
   sensorsValue[0] = readVariableValue("InputValue_1");      /*  1 */
@@ -30,7 +32,7 @@ void readSensors()  /* handling struct for drawing grids */
  
   for(i = 0; i < 10; ++i)
   {
-    if(sensorsValue[i] > savedHighThr[i] && encodeRange(screwdHighThr, screwdLowThr, 1) && sens_sel[i] )
+    if(sensorsValue[i] > savedHighThr[i] && encodeRange(screwdLowThr, screwdHighThr, 0) && sens_sel[i] )
     {
       sensors[i] = 1;
     }
@@ -50,7 +52,7 @@ void readSensors()  /* handling struct for drawing grids */
   }
 }
 
-void readSensParams(int *pageFirstLoad)
+void readSensParams(int *pageFirstLoad) /* BRANJE SHRANJENIH PARAMETROV DOVOLJENIH VREDNOSTI */
 {
   int i;
   int j;
@@ -89,7 +91,7 @@ void readSensParams(int *pageFirstLoad)
   }
 }
 
-void readDustParams(int *pageFirstLoad)
+void readDustParams(int *pageFirstLoad) /* BRANJE SHRANJENIH PARAMETROV DOVOLJENIH VREDNOSTI - smet na senzorju */
 {
   int i;
   int j;
@@ -128,7 +130,7 @@ void readDustParams(int *pageFirstLoad)
   }
 }
 
-void readCurrParams()
+void readCurrParams()  /* BRANJE SHRANJENIH PARAMETROV TOKA MOTORJA */
 {
   int i;
   #ifdef RPI
@@ -149,7 +151,7 @@ void readCurrParams()
   fclose(fp_curr);
 }
 
-void readThrParams(int *pageFirstLoad)
+void readThrParams(int *pageFirstLoad) /* BRANJE SHRANJENIH PARAMETROV O RAZPONU DELOVANJA SENZORJEV */
 {
   int i;
   #ifdef RPI
@@ -186,7 +188,40 @@ void readThrParams(int *pageFirstLoad)
   }
 }
 
-void readCountParams()
+void readThrParamsIntro()
+{
+  int i;
+  #ifdef RPI
+  fp_thr = fopen("/home/pi/PRESA/data/param_thr.txt", "r");
+  #endif
+  #ifdef LUKA
+  fp_thr = fopen("/home/luka/PRESA/data/param_thr.txt", "r");
+  #endif
+
+  for(i = 0; i < 4; ++i)
+  { 
+    getline(&line, &len, fp_thr);
+      
+    if(i==0)
+    {
+      screwdLowThr=atoi(line);
+    }
+    else if(i==1)
+    {
+      screwdHighThr=atoi(line);
+    }
+    else if(i==2)
+    {
+      dustLowThr=atoi(line);
+    }
+    else if(i==3)
+    {
+      dustHighThr=atoi(line);
+    }
+  }
+}
+
+void readCountParams() /* BRANJE SHRANJENIH PODATKOV O STEVILU KOSOV */
 {
   int i;
   #ifdef RPI
@@ -207,7 +242,7 @@ void readCountParams()
   fclose(fp_press_count);
 }
 
-void readCountAllParams()
+void readCountAllParams() /* BRANJE SHRANJENIH PODATKOV O STEVILU KOSOV -skupaj*/
 {
   int i;
   #ifdef RPI
@@ -227,7 +262,7 @@ void readCountAllParams()
   fclose(fp_press_count);
 }
 
-void readSensSelectParams(int *pageFirstLoad)
+void readSensSelectParams(int *pageFirstLoad) /* BRANJE SHRANJENIH PARAMETROV O IZBRANIH SENZORJIH*/
 {
   int i;
   if(*pageFirstLoad)
@@ -288,7 +323,7 @@ void readSensSelectParams(int *pageFirstLoad)
   *pageFirstLoad = 0;
 }
 
-void readDustSelectParams(int *pageFirstLoad)
+void readDustSelectParams(int *pageFirstLoad) /* BRANJE SHRANJENIH PARAMETROV O IZBRANIH SENZOJIH -smet na senzorju */
 {
   int i;
   if(*pageFirstLoad)
@@ -349,8 +384,7 @@ void readDustSelectParams(int *pageFirstLoad)
   *pageFirstLoad = 0;
 }
 
-
-void checkError()
+void checkError() /* PREGLEDOVANJE NAPAKE ZARADI NEDOVOLJENIH VREDNOSTI SENZORJEV */
 {
   int i;
   if(readVariableValue("I_5"))
@@ -363,6 +397,10 @@ void checkError()
         errorMode = 1;
         page = 4;
         sbarText = 7;
+        
+        writeVariableValue("O_9", 1);
+        timer(0.2);
+        writeVariableValue("O_9", 0);
         break;
       }
       else
@@ -374,6 +412,10 @@ void checkError()
         errorMode = 2;
         page = 4;
         sbarText = 8;
+        
+        writeVariableValue("O_9", 1);
+        timer(0.2);
+        writeVariableValue("O_9", 0);
         break;
       }
       else
@@ -384,25 +426,12 @@ void checkError()
     printf("ERROR MODE: %d\n", errorMode); 
   }
 } 
- 
-void checkSelectP0()
-{
-  if(readVariableValue("I_1"))
-  {
-    if(left_button_selected || right_button_selected)
-    {
-      page = 1;
-      sbarText = 5;
-     /*program = 0;*/
-    } 
-  }
-}
 
-void checkSelectP1()
+void checkSelectP1() /* PREVERJANJE IZBIRE V MENIJU - izbira nacina delovanja */
 {
     if(selected[0] == 1)
     {
-      if(encodeRange(160, 340, 0) == 0  && encodeRange(350, 10, 1) == 0 && confirmSelection()/* &&checkOil() && checkAir() && checkForceField()*/)
+      if(/*encodeRange(160, 340, 0) == 0  && encodeRange(350, 10, 1) == 0 &&*/ confirmSelection() && checkOil() && checkAir() && checkMotorDriver())
       {
          sbarText = 0;
          page = 7;
@@ -411,7 +440,7 @@ void checkSelectP1()
   
     else if(selected[1] == 1)
     {
-      if(checkDoublePress()/* &&checkOil() && checkAir() && checkForceField()*/)
+      if(confirmSelection() && checkOil() && checkAir())
       {
         sbarText = 1;
         page = 8;
@@ -420,7 +449,8 @@ void checkSelectP1()
 
     else if(selected[2] == 1)
     {
-      if(encodeRange(160, 340, 0) == 0 && confirmSelection()/* &&checkOil() && checkAir() && checkForceField()*/)
+      
+      if(encodeRange(160, 330, 0) == 0 && confirmSelection() && checkOil() && checkAir() && checkMotorDriver())
       {
         sbarText = 2;
         page = 2;
@@ -428,7 +458,7 @@ void checkSelectP1()
     }
     else if(selected[3] == 1)
     {
-      if(encodeRange(160, 340, 0) == 0 && confirmSelection()/* &&checkOil() && checkAir() && checkForceField()*/)
+      if(encodeRange(160, 330, 0) == 0 && confirmSelection() &&checkOil() && checkAir() && checkMotorDriver())
       {
         page = 2;
         sbarText = 3;
@@ -441,94 +471,7 @@ void checkSelectP1()
   
 }
 
-void checkStopCycle()
-{
-  if(readVariableValue("I_4"))
-  {
-    procedure = 0;
-    page = 1;
-    sbarText = 5;
-    writeVariableValue("O_9", 1);
-    timer(0.2);
-    writeVariableValue("O_9", 0);
-  }
-}
- 
-void checkStartMotor()
-{
-  if(left_button_selected && readVariableValue("I_9")) /* IZBRANA LEVA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
-  {
-    writeVariableValue("O_2", 1);  /* VKLOP MOTORJA V LEVO */ 
-    page = 1;
-    sbarText = 5;
-  } 
-  else if(right_button_selected && readVariableValue("I_10")) /* IZBRANA DESNA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
-  {
-    writeVariableValue("O_3", 1);  /* VKLOP MOTORJA V DESNO */    
-    page = 1;
-    sbarText = 5;
-  } 
-}
-
-void startClutch()
-{
-  writeVariableValue("O_6", 1);
-}
-
-void stopClutch()
-{
-  writeVariableValue("O_6", 0);
-}
-
-void logicTree()
-{
-  switch(page)
-  {
-    case 0:
-      checkStartMotor();
-      break;
-
-    case 1:
-      checkSelectP1(); 
-      checkStopMotor();
-      checkSelection();
-      break; 
-    
-    case 2:
-      while(procedure)
-      {
-        checkError();
-        feeder();
-        if(sbarText == 2)
-        {
-          oneCycle();
-        } 
-        else if(sbarText == 3)
-        {
-          checkPress();
-        }   
-        checkStopCycle();
-      }
-      break;
-
-    case 7:
-      while(procedure)
-      {
-        oneCycle();
-      }
-      break;  
-    
-    case 8:
-      while(procedure)
-      {
-        checkStopCycle();
-      }
-      break;
-  }
-}
-
-
-void initVars()
+void initVars() /* INICIALIZACIJA SPREMENLJIVK */
 {
   int i;
   int count_lab = 1;
@@ -564,9 +507,10 @@ void initVars()
   readCurrParams();
   readCountParams();
   readCountAllParams();
+  readThrParamsIntro();
 }
 
-void timer(float measure)
+void timer(float measure) /* CASOVNI ZAMIK */
 {
   struct timespec start, stop;
   double accum;
@@ -582,7 +526,7 @@ void timer(float measure)
   }
 }
 
-int encodeRange (int a, int b, int mode)
+int encodeRange (int a, int b, int mode) /* PREVERJANJE ALI JE VREDNOST ENCODERJA V IZBRANEM RAZPONU */
 {
   if(mode==0)
   {
@@ -608,66 +552,196 @@ int encodeRange (int a, int b, int mode)
   }
 }
 
-void oneCycle()
+void checkStopCycle() /* STOP TIPKA */
 {
-  startClutch();
-  if(encodeRange(355, 5, 1))
+  if(readVariableValue("I_4") || stop_step == 1)
   {
-    stopClutch();
+    if(stop_step == 0 || stop_step == 1)  
+    {
+      stop_step = 1;
+      stopClutch();
+    }
+    if(stop_step == 2)
+    {
+      if(sbarText == 3 && readVariableValue("I_6"))
+      {
+        writeVariableValue("O_9", 1);
+        timer(0.2);
+        writeVariableValue("O_9", 0);
+      }
+      writeVariableValue("O_7", 0);
+      writeVariableValue("O_8", 0);
+      writeVariableValue("O_10", 0);
+      page = 1;
+      sbarText = 5;
+      stop_step = 0;
+      oneCycleStop = 0;
+      
+      fp_press_count = fopen("/home/pi/PRESA/data/press_count.txt", "w");
+      fprintf(fp_press_count, "%lu\n", press_count);
+      fclose(fp_press_count);
+  
+      fp_press_count_all = fopen("/home/pi/PRESA/data/press_count_all.txt", "w");
+      fprintf(fp_press_count_all, "%lu\n", press_count_all);
+      fclose(fp_press_count_all);
+    }
   }
 }
-
-
-
-
-
-void checkStopMotor()
+ 
+void checkStartMotor() /* VKLOP MOTORJA */
 {
-  if(left_button_selected && readVariableValue("I_2")) /* IZBRANA LEVA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
+  if(left_button_selected && readVariableValue("I_9")) /* IZBRANA LEVA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
   {
-    writeVariableValue("O_2", 0);  /* VKLOP MOTORJA V LEVO */ 
-    page = 0;
-    sbarText = 4;
-    timer(20);
+    writeVariableValue("O_2", 1);  /* VKLOP MOTORJA V LEVO */ 
+    page = 1;
+    sbarText = 5;
   } 
-  else if(right_button_selected && readVariableValue("I_2")) /* IZBRANA DESNA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
+  else if(right_button_selected && readVariableValue("I_9")) /* IZBRANA DESNA SMER IN PRITISNJENA TIPKA ZA VKLOP MOTORJA */
   {
-    writeVariableValue("O_3", 0);  /* VKLOP MOTORJA V DESNO */    
+    writeVariableValue("O_3", 1);  /* VKLOP MOTORJA V DESNO */    
+    page = 1;
+    sbarText = 5;
+  } 
+}
+
+void checkStopMotor() /* IZKLOP MOTORJA */
+{
+  /* int i;*/
+  if(left_button_selected && readVariableValue("I_10")) /* IZBRANA LEVA SMER IN PRITISNJENA TIPKA ZA IZKLOP MOTORJA */
+  {
+    writeVariableValue("O_2", 0);  /* IZKLOP MOTORJA V LEVO */    
     page = 0;
-    sbarText = 4;
+    sbarText = 22;
+    
+    renderBackground();
+    renderStatusBar();
+    renderContent();
+    SDL_RenderPresent(renderer);
+    writeVariableValue("O_1", 1);
     timer(20);
+         
+    writeVariableValue("O_1", 0);
+    sbarText = 4;
+
+  } 
+  else if(right_button_selected && readVariableValue("I_10")) /* IZBRANA DESNA SMER IN PRITISNJENA TIPKA ZA IZKLOP MOTORJA */
+  {
+    writeVariableValue("O_3", 0);  /* IZKLOP MOTORJA V DESNO */    
+    page = 0;
+    sbarText = 22;
+    
+    renderBackground();
+    renderStatusBar();
+    renderContent();
+    SDL_RenderPresent(renderer);
+    writeVariableValue("O_1", 1);
+    timer(20);
+         
+    writeVariableValue("O_1", 0);
+    sbarText = 4;
+  }
+}
+
+void startClutch() /* VKLOP SKLOPKE */
+{
+  writeVariableValue("O_6", 1);
+}
+
+void stopClutch() /* IZKLOP SKLOPKE */
+{
+  if(stop_step == 1)
+  {
+    if(sbarText == 0 || sbarText == 2 || sbarText == 3)
+    {
+      if(encodeRange(stop_angle-20, stop_angle, 0))
+      {
+        writeVariableValue("O_6", 0);
+        stop_step = 2;
+      }
+      else if(oneCycleStop == 1)
+      {
+        stop_step = 2;
+        writeVariableValue("O_6", 0);
+      }
+      else if(procedure == 0)
+      {
+        stop_step = 2;
+      }
+    }
+    else
+    {
+      writeVariableValue("O_6", 0);
+      stop_step = 2;
+    }
+  }
+  else
+  {
+    if(sbarText != 0 || sbarText != 2 || sbarText != 3) 
+    {
+      writeVariableValue("O_6", 0);
+    }
   }
 }
 
 
-
+void oneCycle()  /* EN DELOVNI CIKEL PRESE */
+{
+  if(right_button_selected)
+  {
+    if(encodeRange(stop_angle-20, stop_angle, 0))
+    {
+      stopClutch();
+      oneCycleStop = 1;
+      procedure = 0;
+      /*
+      page = 1;
+      sbarText = 5;*/
+    }
+  }
+  else if(left_button_selected)
+  {
+    if(encoder <= stop_angle+20 && encoder >= stop_angle)
+    {
+      stopClutch();
+      oneCycleStop = 1;
+      procedure = 0;
+      /*
+      page = 1;
+      sbarText = 5;*/
+    }
+  }
+}
 
 void feeder() /* PODAJALNIK IZVIJACEV */
 {
   if(readVariableValue("I_6"))
   {
-    if(readVariableValue("I_7"))
+    if(encodeRange(340, 1, 1) && feeder_step == 0)
     {
       writeVariableValue("O_7", 1);
-      timer(0.2);
-      writeVariableValue("O_7", 0);
-    }
-    if(readVariableValue("I_8"))
+      feeder_step = 1;
+    }  
+    if(readVariableValue("I_7") && feeder_step == 1)
     {
+      writeVariableValue("O_7", 0);
       writeVariableValue("O_8", 1);
-      timer(0.2);
+      feeder_step = 2;
+    }
+    if(readVariableValue("I_8") && feeder_step == 2)
+    {
       writeVariableValue("O_8", 0);
+      feeder_step = 0;
     }
   }
 }
 
-void blowAir()
+void blowAir() /* IZPIHOVANJE ZRAKA */
 {
-  if(encodeRange(355, 55, 1))
+  if(encodeRange(300, 55, 1))
   {
     writeVariableValue("O_10", 1);
   }
-  else if(encodeRange(56, 354, 0))
+  else if(encodeRange(56, 299, 0))
   {
     writeVariableValue("O_10", 0);
   }
@@ -685,9 +759,21 @@ void screwdriverSpring()
   }
 }
 
-void checkPress()
+void forceFieldBridge()
 {
-  if(encodeRange(355, 5, 1))
+  if(encodeRange(80, 240, 0))
+  {
+    writeVariableValue("O_5", 1);
+  }
+  else if(encodeRange(241, 79, 1))
+  {
+    writeVariableValue("O_5", 0);
+  }
+}
+
+void checkPress() /* STETJE KOSOV */
+{
+  if(encodeRange(330, 10, 1))
   {
     if(!counted)
     {
@@ -696,53 +782,51 @@ void checkPress()
       counted = 1;
     }
   }
-  if(encodeRange(300, 354, 0))
+  if(encodeRange(150, 300, 0))
   {
     counted = 0;
   }
 }
 
-void checkSelection()
+void checkSelection() /* PREVERJANJE IZBIRE ZARADI VKLOPA RELEJEV */
 {
   if(selected[0] == 1 || selected[2] == 1 || selected[3] == 1)
   {
     writeVariableValue("O_4", 1);
-    writeVariableValue("0_5", 0);
+    writeVariableValue("O_5", 0);
   }
   else if(selected[1] == 1)
   {
     writeVariableValue("O_4", 0);
     writeVariableValue("O_5", 1);
   }
-  else if(selected[0] == 1 || selected[1] == 1 || selected[2] == 1 || selected[3] == 1)
+  else if(selected[0] == 0 || selected[1] == 0 || selected[2] == 0 || selected[3] == 0)
   {
     writeVariableValue("O_4", 0);
     writeVariableValue("O_5", 0);
   }
 }
 
-int confirmSelection()
+int confirmSelection() /* POTRJEVANJE IZBIRE - start cikla */
 {
   if(readVariableValue("I_3"))
   {
+    writeVariableValue("O_12", 1);
+    timer(2);
+    writeVariableValue("O_12", 0);
     return 1;
   }
   return 0;
 }
 
-void checkStressSensor()
-{
-  if(readVariableValue("RTDValue_2_i05"))
-  {
-    writeVariableValue("O_3", 0);
-  }
-}
 
-int checkDoublePress()
+
+int checkDoublePress() /* DVOROCNI VKLOP */
 {
-  if(readVariableValue("I_1") && readVariableValue("I_2") == 0)
+  if(readVariableValue("I_1") == 0 && readVariableValue("I_2"))
   {
     procedure = 1;
+    startClutch();
     return 1;
   }
   else
@@ -751,22 +835,28 @@ int checkDoublePress()
   }
 }
 
-int checkOil()
+void checkStressSensor() /* PREVERJANJE PREOBREMENITVE PRESE */
 {
-  if(readVariableValue("RTDValue_2_i04"))
+  if(readVariableValue("RTDValue_2_i05") < 1000)
   {
-    return 1;
-  }
-  else
-  {
-    return 0;
+    sbarText = 11;
+    stopClutch();
+    backgroundColor = 2;
+    writeVariableValue("O_3", 0);
+    writeVariableValue("O_2", 0);
   }
 }
 
-int checkAir()
+int checkOilError() /* PREVERJANJE NAPAKE OLJA */
 {
-  if(readVariableValue("RTDValue_1_i05"))
-  {
+  if(readVariableValue("RTDValue_2_i04") < 1000)
+  { 
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
+    sbarText = 18;
+    backgroundColor = 2;
+    stopClutch();
     return 1;
   }
   else
@@ -775,10 +865,30 @@ int checkAir()
   }
 }
 
-int checkForceField()
+int checkOil() /* PREVERJANJE OLJA */
 {
-  if(readVariableValue("I_12"))
+  if(readVariableValue("RTDValue_2_i04") < 1000)
   {
+    sbarText = 18;
+    return 0;
+  }
+  else
+  {
+    return 1;
+  }
+
+}
+
+int checkAirError() /* PREVERJANJE NAPAKE ZRAKA */
+{
+  if(readVariableValue("RTDValue_1_i05") < 1000)
+  {
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
+    sbarText = 19;
+    backgroundColor = 2;
+    stopClutch();
     return 1;
   }
   else
@@ -787,42 +897,279 @@ int checkForceField()
   }
 }
 
-int checkZeroPosition()
+int checkAir() /* PREVERJANJE ZRAKA */
+{
+  if(readVariableValue("RTDValue_1_i05") < 1000)
+  {
+    sbarText = 19;
+    return 0;
+  }
+  else
+  {
+    return 1;
+  }
+}
+
+int checkForceField() /* VARNOSTNA ZAVESA */
 {
   if(readVariableValue("I_11"))
   {
     return 1;
   }
-  return 0;
-
+  else if(delay_stop == 1 && encodeRange(241, 79, 1))
+  {
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);   
+    stopClutch();
+    sbarText = 13;
+    backgroundColor = 2;
+    hold_red = 1;
+    delay_stop = 0;
+    return 1;
+  }
+  else
+  {
+    if(encodeRange(80, 240, 0) == 0)
+    {
+      delay_stop = 1; 
+      backgroundColor = 2;
+      hold_red = 1;
+      return 0;
+    }
+    else if(encodeRange(241, 79, 1))
+    { 
+      writeVariableValue("O_9", 1);
+      timer(0.2);
+      writeVariableValue("O_9", 0);
+      stopClutch();
+      sbarText = 13;
+      backgroundColor = 2;
+      hold_red = 1;
+      return 0;
+    }
+    return 0;
+  }
 }
 
-
-int checkStopTotal()
+int checkZeroPosition()  /* NICELNA TOCKA */
 {
-  if(readVariableValue("RTDValue_1"))
+  if(readVariableValue("I_12") == 0 && encodeRange(31, 331, 0))
   {
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
+    stopClutch();
+    sbarText = 17;
+    backgroundColor = 2;
     return 1;
   }
   return 0;
 }
 
-int checkMotorDriverError()
+int checkFeederIntro()  /* horizontalni pomik */
 {
-  if(readVariableValue("RTDValue_2"))
+  if(readVariableValue("I_14") == 0)
   {
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
+    stopClutch();
+    sbarText = 20;
+    backgroundColor = 2;
     return 1;
   }
   return 0;
 }
 
-int checkClutchError()
+int checkFeederLift()  /* vertikalni TOCKA */
 {
-  if(readVariableValue("RTDValue_1_i04"))
-  {
+  if(readVariableValue("I_13") == 0 && encodeRange(350, 20, 1))
+  { 
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
+    stopClutch();
+    sbarText = 21;
+    backgroundColor = 2;
     return 1;
   }
   return 0;
 }
+
+
+int checkStopTotal() /*STOP TOTAL - goba */
+{
+  if(readVariableValue("RTDValue_1") < 1000)
+  {
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
+    stopClutch();
+    sbarText = 14;
+    backgroundColor = 2;
+   
+    return 1;
+  }
+  return 0;
+}
+
+int checkMotorDriverError() /* PREVERJANJE NAPAKE DRIVERJA MOTORJA */
+{
+  if(readVariableValue("RTDValue_2") < 1000)
+  {
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
+    stopClutch();
+    writeVariableValue("O_2", 0);
+    writeVariableValue("O_3", 0);
+    sbarText = 15;
+    backgroundColor = 2;
+   
+    return 1;
+  }
+  return 0;
+}
+
+int checkMotorDriver() /* PREVERJANJE DRIVERJA MOTORJA */
+{
+  if(readVariableValue("RTDValue_2") < 1000)
+  {
+    stopClutch();
+    writeVariableValue("O_2", 0);
+    writeVariableValue("O_3", 0);
+    sbarText = 15;
+    backgroundColor = 2;
+    return 0;
+  }
+  return 1;
+}
+
+int checkClutchError() /* PREVERJANJE NAPAKE SKLOPKE */
+{
+  if(readVariableValue("RTDValue_1_i04") < 1000)
+  {
+    writeVariableValue("O_9", 1);
+    timer(0.2);
+    writeVariableValue("O_9", 0);
+    stopClutch();
+    sbarText = 16;
+    backgroundColor = 2;
+    return 1;
+  }
+  return 0;
+}
+
+void logicTree() /* DELOVNA LOGIKA PO STRANEH (nekaj je tudi v graphics filetu) */
+{
+  switch(page)
+  {
+    case 0:
+      if(readVariableValue("RTDValue_2") > 1000)
+      {
+        checkStartMotor();
+        writeVariableValue("OutputValue_1_i05", setCurrent);
+      }
+      else
+      {
+        sbarText = 15;
+        backgroundColor = 2;
+      }
+      break;
+
+    case 1:
+      sbarText = 5;
+      checkSelectP1(); 
+      checkStopMotor();
+      checkSelection();
+      if(selected[1])
+      {
+        screwdriverSpring();
+      }
+      procedure = 0;
+      hold_red = 0;
+      if(readVariableValue("RTDValue_2") < 1000)
+      {
+        page = 0;
+        writeVariableValue("O_2", 0);
+        writeVariableValue("O_3", 0);
+      }
+      break; 
+    
+    case 2:
+      if(sbarText == 3 || sbarText == 2 )
+      {
+        checkDoublePress();
+      }
+      if(procedure)
+      {
+        if(hold_red != 1)
+        {
+          backgroundColor = 0;
+        }
+        checkError();
+        checkForceField();
+        checkMotorDriverError();
+        checkClutchError();
+        checkZeroPosition();
+        checkOilError();
+        checkAirError();
+        checkStopTotal();
+        checkFeederIntro(); 
+        checkFeederLift(); 
+        
+        if(sbarText == 2)
+        {
+          oneCycle();
+          checkPress();
+          feeder();
+          blowAir();
+          screwdriverSpring();
+          forceFieldBridge();
+        } 
+        else if(sbarText == 3)
+        {
+          checkPress();
+          feeder();
+          blowAir();
+          screwdriverSpring();
+          forceFieldBridge();
+        }   
+        checkStopCycle();
+      }
+      checkStopCycle();
+      break;
+
+    case 4:
+      stopClutch();
+      checkStopCycle();
+      break;
+
+    case 7:
+      checkDoublePress();
+      checkStopCycle();
+      if(procedure)
+      {
+        encoder = round((readVariableValue("InputValue_3_i05")-substract)/divisor);
+        checkForceField();
+        oneCycle();
+        checkStopCycle();
+      }
+      break;  
+    
+    case 8:
+      if(procedure)
+      {
+        checkStopCycle();
+      }
+      checkStopCycle();
+      break;
+  }
+}
+
+
+
+
 
 

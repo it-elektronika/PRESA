@@ -10,7 +10,7 @@ SDL_Event event;
 SDL_Point touchLocation = {-1, -1};
 
 SDL_Color whiteColor = {255, 255, 255, 0};
-SDL_Color blackColor = {0, 0, 0, 0};
+SDL_Color blackColor = {50, 50, 50, 0};
 
 TTF_Font *smallText;
 TTF_Font *regularText;

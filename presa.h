@@ -11,7 +11,19 @@ extern FILE *fp_press_count_all;
 extern FILE *fp_sens_sel;
 extern FILE *fp_dust_sel;
 
+extern FILE *fp_encoder;
+
 int procedure;
+extern int stop_step;
+extern int oneCycleStop;
+extern int delay_stop;
+extern int hold_red;
+
+
+extern int rpm;
+extern float a;
+extern int stop_angle;
+
 
 extern char fileBuff[10][50];
 extern char fileBuffRm[10][50];
@@ -44,7 +56,7 @@ extern char piece_count_text_all[30];
 extern int sens_sel[10];
 extern int dust_sel[10];
 
-
+int feeder_step;
 extern unsigned long maxCount;
 
 extern int dustThr;
@@ -71,8 +83,10 @@ extern char currentMinus[10][50];
 extern char currentText[40];
 extern int setCurrent;
 
-extern char airText[30];
-extern char oilText[30];
+extern char airText[40];
+extern char oilText[40];
+extern char driverText[40];
+
 extern int errorMode;
 
 extern int margin;
@@ -106,6 +120,7 @@ extern void readDustParams(int *pageFirstLoad);
 
 extern void readCurrParams();
 extern void readThrParams(int *pageFirstLoad);
+extern void readThrParamsIntro();
 extern void readCountParams();
 extern void readCountAllParams();
 extern void readSensSelectParams(int *pageFirstLoad);
@@ -129,10 +144,15 @@ int confirmSelection();
 void checkSelection();
 void blowAir();
 void screwdriverSpring();
+void forceFieldBridge();
 int checkZeroPosition();
 int checkStopTotal();
 int checkMotorDriverError();
-
+int checkClutchError();
+int checkAirError();
+int checkOilError();
+int checkMotorDriver();
 void startClutch();
 void stopClutch();
-
+int checkFeederIntro();
+int checkFeederLift();

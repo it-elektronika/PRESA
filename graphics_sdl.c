@@ -96,7 +96,7 @@ void renderBackground(void)
       SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
       break;
     case 2:
-      SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+      SDL_SetRenderDrawColor(renderer, 255, 86, 71, 255);
       break;
   }
   SDL_RenderClear(renderer);
@@ -180,7 +180,7 @@ void renderStatusBar()
  
   for(i = 0; i < 10; i++)
   {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
     SDL_RenderDrawLine(renderer, x1_1, y1_1+i, x1_2, y1_2+i);
     SDL_RenderDrawLine(renderer, x2_1, y2_1, x2_2, y2_2);
     SDL_RenderDrawLine(renderer, x3_1, y3_1, x3_2, y3_2);
@@ -233,12 +233,54 @@ void renderStatusBar()
       break;
 
     case 11:
-      renderText("PRESA STISNJENA", regularText, blackColor);
+      renderText("NAPAKA PREOBREMENITEV PRESE", regularText, blackColor);
       break;
 
     case 12:
       renderText("KOT ZAZNAVANJA", regularText, blackColor);
-  } 
+      break;
+  
+    case 13: 
+      renderText("NAPAKA VARNOSTNA ZAVESA", regularText, blackColor);
+      break;
+    
+    case 14:
+      renderText("STOP TOTAL", regularText, blackColor);
+      break;
+
+    case 15:
+      renderText("NAPAKA DRIVERJA MOTORJA", regularText, blackColor);
+      break;
+
+    case 16:
+      renderText("NAPAKA SKLOPKE", regularText, blackColor);
+      break;
+
+    case 17:
+      renderText("NAPAKA POZICIJE", regularText, blackColor);
+      break;
+    
+    case 18:
+      renderText("NAPAKA OLJE", regularText, blackColor);
+      break;
+
+    case 19:
+      renderText("NAPAKA ZRAK", regularText, blackColor);
+      break;
+
+    case 20:
+      renderText("NAPAKA HORIZONTALNI POMIK", regularText, blackColor);
+      break;
+
+    case 21:
+      renderText("NAPAKA VERTIKALNI POMIK", regularText, blackColor);
+      break;
+   
+    case 22:
+      renderText("USTAVLJANJE MOTORJA", regularText, blackColor);
+      break;
+
+     } 
   
   if(page == 5 || page == 6) 
   {
@@ -267,15 +309,7 @@ void renderInCycle()
   SDL_RenderDrawRect(renderer, &bar1);
   SDL_RenderDrawRect(renderer, &bar2);
   
-  fp_press_count = fopen("/home/pi/PRESA/data/press_count.txt", "w");
-  fprintf(fp_press_count, "%lu\n", press_count);
-  fclose(fp_press_count);
   
-  fp_press_count_all = fopen("/home/pi/PRESA/data/press_count_all.txt", "w");
-  fprintf(fp_press_count_all, "%lu\n", press_count_all);
-  fclose(fp_press_count_all);
-
-
   for(i = 0; i < 5; i++)
   {
     holes[i].x = 50;
@@ -294,19 +328,13 @@ void renderInCycle()
   sprintf(piece_count_text, "ST. KOSOV: %lu", press_count);
   renderText(piece_count_text, smallText,  blackColor);
   render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);
-
-
-
-/*
-  sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr[0]);
-  renderText(savedPlus, smallText, blackColor);
-  render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);
-*/    
+  
+ 
   for(i = 0; i < 5; i++)
   {
     if(sensors[sens_c] > 0 || sensors[sens_c+1] > 0)
     {
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
       SDL_RenderFillRect(renderer, &holes[i]);
     }
     else
@@ -449,8 +477,8 @@ void renderSettingsScrewdriver()
       renderText(sensorLabels[i], smallText,  blackColor);
       render(30, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
     
-      up_button(540, y, &currentMargin[i], 1000);
-      down_button(620, y, &currentMargin[i], 1000);
+      up_button(540, y, &currentMargin[i], 100);
+      down_button(620, y, &currentMargin[i], 100);
       button_save(1150, ya, 130, 65, i);
    
     }
@@ -544,8 +572,8 @@ void renderSettingsDust()
       renderText(sensorLabels[i], smallText,  blackColor);
       render(30, y, NULL, 0.0, NULL, SDL_FLIP_NONE);
 
-      up_button(540, y, &currentDustMargin[i], 1000);
-      down_button(620, y, &currentDustMargin[i], 1000);
+      up_button(540, y, &currentDustMargin[i], 100);
+      down_button(620, y, &currentDustMargin[i], 100);
       button_save(1150, ya, 130, 65, i);
     }
 
@@ -587,7 +615,18 @@ void renderTurnSelect()
   int i;
   
   sprintf(currentText, "STEVILO UDARCEV NA MINUTO: %d", (int)round(setCurrent/138.888888889));
-  
+  if(right_button_selected)
+  {
+    rpm =  (int)round(setCurrent/138.888888889);
+    a = (rpm-30) * 2.0;
+    stop_angle = round(359 - a);
+  }
+  else if(left_button_selected)
+  {
+    rpm =  (int)round(setCurrent/138.888888889);
+    a = (rpm-30) * 2.0;
+    stop_angle = round(0 + a);
+  }
   if(setCurrent <=9999)
   {
     up_button(1000, 700, &setCurrent, 138.888888889);
@@ -599,10 +638,10 @@ void renderTurnSelect()
  
   renderText(currentText, regularText, blackColor);
   render(200, 700, NULL, 0.0, NULL, SDL_FLIP_NONE);
- 
+  
   left_button(400, 250);
   right_button(700, 250); 
-  
+   
   for(i = 0; i < 10; i++)
   {
     SDL_RenderDrawLine(renderer, 0, 600+i, 1280, 600+i);
@@ -613,7 +652,6 @@ void renderModeSelect()
 {
   if(right_button_selected)
   {
-
     button(100, 150, 570, 155, "POMIK V IZHODISCE", 0);
     button(100, 300, 570, 155, "ROCNI NACIN", 1);
    
@@ -631,7 +669,7 @@ void renderModeSelect()
 
   if(checkAir())
   {
-    sprintf(airText, "PRITISK ZRAKA: V REDU");
+    sprintf(airText, "PRITISK ZRAKA: V REDU" );
     renderText(airText, smallText, blackColor);
     render(800, 600, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
@@ -654,12 +692,24 @@ void renderModeSelect()
     renderText(oilText, smallText, blackColor);
     render(800, 650, NULL, 0.0, NULL, SDL_FLIP_NONE);
   }
- 
+  if(checkMotorDriver())
+  {
+    sprintf(driverText, "MOTOR DRIVER: V REDU");
+    renderText(driverText, smallText, blackColor);
+    render(800, 550, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  }
+  else if(checkMotorDriver() == 0 && blinkerCounter > 10)
+  {
+    sprintf(driverText, "MOTOR DRIVER: NI V REDU");
+    renderText(driverText, smallText, blackColor);
+    render(800, 550, NULL, 0.0, NULL, SDL_FLIP_NONE);
+  }
+  
   sprintf(piece_count_text, "ST. KOSOV: %lu", press_count);
   renderText(piece_count_text, smallText,  blackColor);
   render(800, 400, NULL, 0.0, NULL, SDL_FLIP_NONE);
  
-  button(1100, 400, 30, 30, "R", 8);
+  button(1100, 380, 50, 50, "R", 8);
 
   sprintf(piece_count_text_all, "ST. KOSOV SKUPAJ: %lu", press_count_all);
   renderText(piece_count_text_all, smallText,  blackColor);
@@ -693,12 +743,6 @@ void renderErrorMode1()
   sprintf(encoderVal, "POZICIJA: %d%c", encoder, 0x00B0);
   renderText(encoderVal, smallText,  blackColor);
   render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
-
-  /*sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr[0]);
-  renderText(savedPlus, smallText, blackColor);
-  render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);   
-  */   
-
   renderHoleLabels();   
 
   y = 150;
@@ -756,7 +800,7 @@ void renderErrorMode1()
   {
     if(sensors[sens_c] > 0 || sensors[sens_c+1] > 0)
     {
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
       SDL_RenderFillRect(renderer, &holes[i]);
     }
     else
@@ -783,12 +827,6 @@ void renderErrorMode2()
   sprintf(encoderVal, "POZICIJA: %d%c", encoder, 0x00B0);
   renderText(encoderVal, smallText,  blackColor);
   render(500, 720, NULL, 0.0, NULL, SDL_FLIP_NONE);
-
-  /*sprintf(savedPlus, "MAKSIMALNA DOVOLJENA VREDNOST: %d", savedHighThr[0]);
-  renderText(savedPlus, smallText, blackColor);
-  render(500, 680, NULL, 0.0, NULL, SDL_FLIP_NONE);   
-  */
-
   renderHoleLabels(); 
     
   y = 150;
@@ -847,7 +885,7 @@ void renderErrorMode2()
   {
     if(sensorsDust[sens_c] > 0 || sensorsDust[sens_c+1] > 0)
     {
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
       SDL_RenderFillRect(renderer, &holes[i]);
     }
     else
@@ -893,6 +931,7 @@ void renderContent()
   {
     case 0:
       backgroundColor = 1;
+      sbarText = 4;
       renderTurnSelect();
       break;
     case 1:
@@ -900,7 +939,7 @@ void renderContent()
       renderModeSelect();
       break;
     case 2:
-      backgroundColor = 0;
+      backgroundColor = 1;
       renderInCycle();
       break;
     case 3:
@@ -1008,11 +1047,19 @@ void up_button(int x,  int y, int *incrementee, int incrementor)
         fprintf(fp_curr, "%d\n", setCurrent);
         fclose(fp_curr);
       }
-      writeVariableValue("OutputValue_4_i05", setCurrent);
+      
+    
     } 
-    else if(page!=0)
+    else if(page!= 0 && page != 9)
     {
       if(*incrementee <= 9999)
+      {
+        *incrementee = *incrementee + incrementor;
+      }
+    }
+    else if(page == 9)
+    {
+      if(*incrementee <= 359)
       {
         *incrementee = *incrementee + incrementor;
       }
@@ -1066,13 +1113,19 @@ void down_button(int x, int y, int *decrementee, int decrementor)
        fprintf(fp_curr, "%d\n", setCurrent);
        fclose(fp_curr);
       }
-      /*writeVariableValue("OutputValue_1_i05", setCurrent);*/
     }
-    else if(page!=0)
+    else if(page!=0 && page != 9)
     {
       if(*decrementee > 0)
       {
        *decrementee = *decrementee - decrementor;
+      }
+    }
+    else if(page == 9)
+    {
+      if(*decrementee > 0)
+      {
+        *decrementee = *decrementee - decrementor;
       }
     }
   }
@@ -1128,7 +1181,7 @@ void left_button(int x,  int y)
   {
     for(i = 0; i < 10; i++)
     {
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
       SDL_RenderDrawLine(renderer, x, y+i, (x+imageSurface->w), y+i);
       SDL_RenderDrawLine(renderer, (x+imageSurface->w+i), y, (x+imageSurface->w+i), (y+imageSurface->h)); 
       SDL_RenderDrawLine(renderer, (x+imageSurface->w), (y+imageSurface->h-i), x, (y+imageSurface->h-i));
@@ -1190,7 +1243,7 @@ void right_button(int x,  int y)
   {
     for(i = 0; i < 10; i++)
     {
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
       SDL_RenderDrawLine(renderer, x, y+i, (x+imageSurface->w), y+i);
       SDL_RenderDrawLine(renderer, (x+imageSurface->w+i), y, (x+imageSurface->w+i), (y+imageSurface->h)); 
       SDL_RenderDrawLine(renderer, (x+imageSurface->w), (y+imageSurface->h-i), x, (y+imageSurface->h-i));
@@ -1202,7 +1255,7 @@ void right_button(int x,  int y)
 
 void button_save(int x, int y, int w, int h, int sel)  
 {
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
   SDL_RenderDrawLine(renderer, x, y, (x+w), y);
   SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
   SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
@@ -1280,7 +1333,7 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
 {
   int i;
   
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
 
   if(id == 0 || id == 1 || id == 2 || id == 3)
   {
@@ -1377,7 +1430,6 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
   
     if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
     {
-      /*page_settings_screwdriver_FirstLoad = 1;*/
       page = 5;
       sbarText = 9;
     }
@@ -1399,7 +1451,6 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
   
     if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
     {
-      /*page_settings_dust_FirstLoad = 1;*/
       page = 6;
       sbarText = 10;
     }
@@ -1419,7 +1470,6 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
   
     if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
     {
-      /*page_settings_angle_FirstLoad = 1;*/
       page = 9;
       sbarText = 12;
     }
@@ -1437,7 +1487,6 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
   
     if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp)
     {
-      /*page_settings_angle_FirstLoad = 1;*/
       press_count = 0;
       fp_press_count = fopen("/home/pi/PRESA/data/press_count.txt", "w");
       fprintf(fp_press_count, "%lu\n", press_count);
@@ -1446,67 +1495,10 @@ void button(int x, int y, int w, int h, char *text, int id)  /* save row/column 
   }
 }
 
-/*
-void keypad(int x, int y, int w, int h) 
-{
-  int i = 1;
-  int j = 1;
-  int nums = 1;
-  int origX = x;
-  int origY = y;
-  
-  SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-  SDL_RenderDrawLine(renderer, x, y-h, (x+w*3), y-h);
-  SDL_RenderDrawLine(renderer, (x+w*3), y-h, (x+w*3), y); 
-  SDL_RenderDrawLine(renderer, (x+w*3), y, x, y);
-  SDL_RenderDrawLine(renderer, x, y, x, y-h);
-  writeText(passText, regularText, textColor);
-  render(x, y - h , NULL, 0.0, NULL, SDL_FLIP_NONE); 
-
-  for(j = 1; j < 4; ++j)
-  {  
-    for(i = 1; i < 4; ++i)
-    {
-      SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-      SDL_RenderDrawLine(renderer, x, y, (x+w), y);
-      SDL_RenderDrawLine(renderer, (x+w), y, (x+w), (y+h)); 
-      SDL_RenderDrawLine(renderer, (x+w), (y+h), x, (y+h));
-      SDL_RenderDrawLine(renderer, x, (y+h), x, y);
-      sprintf(numBuff, "%d", nums);
-      writeText(numBuff, regularText, textColor);
-      render(x+((w/2)-(textureWidth/2)), y + ((h/2)-(textureHeight/2)), NULL, 0.0, NULL, SDL_FLIP_NONE); 
-      if(touchLocation.x > x && touchLocation.x < x+w && touchLocation.y > y && touchLocation.y < y + h && timestamp > oldtimestamp && cycleCheck != cycleCounter)
-      {
-        cycleCheck = cycleCounter;
-        if(passText[4] == '\0')
-        {
-          strcat(passText, numBuff);
-        }
-      }
-      if(passText[4] != '\0')
-      {
-        int ret;
-        ret = strcmp(DROWSAPP, passText);
-        if(ret == 0)
-        {
-          pageNumber = 3;  
-        }
-        memset(&passText[0], 0, 5);
-      }
-      x = x + w;
-      nums++;
-    }
-    x = origX;
-    y = y + h;
-  }
-  y = origY;
-}
-*/
-
 void renderAdmin(int x, int y, int w, int h, int gotoNum) 
 {
   int i;
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+  SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
   for(i = 0; i < 5; ++i)
   {
     SDL_RenderDrawLine(renderer, x, y+i, (x+w), y+i);
@@ -1552,10 +1544,7 @@ void renderAdmin(int x, int y, int w, int h, int gotoNum)
         fprintf(fp_dust_sel, "%d\n", dust_sel[i]);
       }
       fclose(fp_dust_sel);
-
-
     }   
-    /* memset(&passText[0], 0, 5); enable if using keypad*/ 
   }
 }
 
@@ -1587,45 +1576,6 @@ void renderHoleLabels()
     count_num = count_num + 2;
   }
 }
-
-/*
-void DrawCircle(SDL_Renderer *Renderer, s32 _x, s32 _y, s32 radius)
-{ 
-   s32 x = radius - 1;
-   s32 y = 0;
-   s32 tx = 1;
-   s32 ty = 1;
-   s32 err = tx - (radius << 1); 
-   while (x >= y)
-   {
-     
-      SDL_RenderDrawPoint(Renderer, _x + x, _y - y);
-      SDL_RenderDrawPoint(Renderer, _x + x, _y + y);
-      SDL_RenderDrawPoint(Renderer, _x - x, _y - y);
-      SDL_RenderDrawPoint(Renderer, _x - x, _y + y);
-      SDL_RenderDrawPoint(Renderer, _x + y, _y - x);
-      SDL_RenderDrawPoint(Renderer, _x + y, _y + x);
-      SDL_RenderDrawPoint(Renderer, _x - y, _y - x);
-      SDL_RenderDrawPoint(Renderer, _x - y, _y + x);
-
-      if (err <= 0)
-      {
-         y++;
-         err += ty;
-         ty += 2;
-      }
-      else if (err > 0)
-      {
-         x--;
-         tx += 2;
-         err += tx - (radius << 1);
-      }
-   }
-}
-
-
-
-*/
 
 void sens_sel_button(int x, int y, int w, int h, int id)
 {

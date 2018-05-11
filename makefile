@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Werror -pedantic -I.
+CFLAGS=-Wall -Wextra  -pedantic -I.
 LIBS=-lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
 
